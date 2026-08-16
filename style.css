@@ -579,3 +579,217 @@ td{font-size:11px}
   line-height:1.4;
   backdrop-filter:blur(8px);
 }
+
+
+/* ==========================================================
+   V7 — PRIORITY DASHBOARD + STABLE TABS
+   ========================================================== */
+
+/* Force fresh, stable desktop shell */
+@media(min-width:681px){
+  .portal{
+    display:block;
+    min-height:100vh;
+  }
+  .sidebar{
+    position:fixed;
+    left:0;
+    top:0;
+    bottom:0;
+    width:220px;
+    height:100vh;
+    overflow-y:auto;
+    z-index:60;
+  }
+  .main{
+    margin-left:220px;
+    min-width:0;
+    min-height:100vh;
+  }
+  .topbar{
+    left:0;
+    width:100%;
+  }
+}
+
+.view-section{
+  width:100%;
+  max-width:1320px;
+  margin:0 auto;
+}
+.content{
+  padding:20px 24px 42px;
+  max-width:none;
+}
+
+/* Unified tab headers */
+.section-head,
+.dashboard-priority-head{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:18px;
+  margin:0 0 16px;
+}
+.dashboard-priority-head h2,
+.section-head h3{
+  margin:4px 0 5px;
+  font-size:22px;
+  line-height:1.15;
+  letter-spacing:-.035em;
+  color:#102b4f;
+}
+.dashboard-priority-head p:not(.eyebrow),
+.section-head p{
+  margin:0;
+  font-size:10.5px;
+  line-height:1.55;
+  color:#74869b;
+}
+.dashboard-head-actions{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+/* Cards are the first / primary content */
+.priority-grid{
+  margin-bottom:14px;
+}
+.system-grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:12px;
+}
+.system-card{
+  min-height:220px;
+}
+.card-priority{
+  position:relative;
+  z-index:2;
+  font-size:21px;
+  line-height:1;
+  font-weight:800;
+  letter-spacing:-.06em;
+  color:color-mix(in srgb,var(--card-a) 45%,#b4c2d0);
+}
+.system-card-body .status-pill{
+  margin-bottom:9px;
+}
+.system-card-body h3{
+  font-size:15px;
+  margin:0 0 7px;
+}
+.system-card-body p{
+  font-size:10.5px;
+  min-height:46px;
+}
+
+/* Secondary hero now below system links */
+.secondary-hero{
+  min-height:175px;
+  margin:12px 0 6px;
+  padding:25px 31px;
+  box-shadow:0 7px 22px rgba(34,74,111,.055);
+}
+.secondary-hero h1{
+  font-size:clamp(25px,2.8vw,34px);
+  max-width:700px;
+}
+.secondary-hero p{
+  font-size:11px;
+}
+.secondary-hero .hero-actions{
+  display:none;
+}
+.dashboard-last-updated{
+  text-align:right;
+  margin:6px 2px 0;
+}
+
+/* Settings / user / profile visual rhythm */
+#settingsSection .branding-settings-card{
+  margin-bottom:15px;
+}
+.system-list-heading{
+  margin:14px 0 8px;
+}
+.table-panel{
+  border-radius:15px;
+  overflow:hidden;
+}
+.table-wrap{
+  width:100%;
+}
+#usersSection .table-panel,
+#settingsSection .table-panel{
+  width:100%;
+}
+.profile-card,
+.profile-actions{
+  max-width:900px;
+}
+
+/* Keep sidebar readable and aligned */
+.side-nav{
+  padding:0 2px;
+}
+.nav-btn{
+  min-height:46px;
+}
+.side-bottom{
+  padding-top:8px;
+}
+
+/* Login video layer: never blocks interaction */
+.login-video{
+  pointer-events:none;
+}
+.login-panel,
+.login-card{
+  position:relative;
+  z-index:5;
+}
+
+/* No old search UI can occupy layout */
+.dashboard-toolbar,
+#noSearchResults,
+.system-search-wrap{
+  display:none !important;
+}
+
+/* Responsive */
+@media(max-width:1180px) and (min-width:901px){
+  .system-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:900px) and (min-width:681px){
+  .sidebar{width:76px}
+  .main{margin-left:76px}
+  .content{padding:16px 16px 34px}
+  .system-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:680px){
+  .portal{display:block}
+  .main{margin-left:0}
+  .content{padding:12px 10px 80px}
+  .dashboard-priority-head,
+  .section-head{
+    align-items:stretch;
+    flex-direction:column;
+    gap:10px;
+  }
+  .dashboard-head-actions{
+    width:100%;
+  }
+  .dashboard-head-actions button{
+    flex:1;
+  }
+  .system-grid{grid-template-columns:1fr}
+  .system-card{min-height:190px}
+  .secondary-hero{
+    min-height:0;
+    padding:20px 18px;
+  }
+  .secondary-hero h1{font-size:25px}
+}
