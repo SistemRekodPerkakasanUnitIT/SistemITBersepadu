@@ -11,6 +11,7 @@ function setText(selector, value) {
 let session = null;
 let systems = [];
 let users = [];
+let auditLogs = [];
 let pendingIconFile = null;
 let pendingPortalLogoFile = null;
 
@@ -59,7 +60,7 @@ if (window.matchMedia("(display-mode: standalone)").matches || window.navigator.
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./service-worker.js?v=8.0.0").catch(() => {});
+    navigator.serviceWorker.register("./service-worker.js?v=8.1.0").catch(() => {});
   });
 }
 
@@ -283,6 +284,11 @@ function recordSystemAccess(id) {
   const history = getAccessHistory();
   history[String(id)] = new Date().toISOString();
   localStorage.setItem(getAccessStoreKey(), JSON.stringify(history));
+  const system = systems.find(s => String(s.id) === String(id));
+  recordClientActivity("OPEN_SYSTEM", {
+    targetId: String(id || ""),
+    targetName: system?.name || "Sistem"
+  });
   renderDashboardSystems();
 }
 
@@ -404,6 +410,117 @@ function renderUsers() {
       </tr>
     `;
   }).join("");
+}
+
+
+function auditActionLabel(action) {
+  const labels = {
+    LOGIN: "Log Masuk",
+    LOGOUT: "Log Keluar",
+    OPEN_SYSTEM: "Buka Sistem",
+    ADD_SYSTEM: "Tambah Sistem",
+    UPDATE_SYSTEM: "Kemaskini Sistem",
+    DELETE_SYSTEM: "Padam Sistem",
+    ADD_USER: "Tambah Pengguna",
+    UPDATE_USER: "Kemaskini Pengguna",
+    DELETE_USER: "Padam Pengguna",
+    CHANGE_PASSWORD: "Tukar Kata Laluan",
+    UPDATE_BRANDING: "Kemaskini Logo"
+  };
+  return labels[String(action || "")] || String(action || "Aktiviti");
+}
+
+function auditCategory(action) {
+  action = String(action || "");
+  if (action === "LOGIN") return "LOGIN";
+  if (action === "LOGOUT") return "LOGOUT";
+  if (action === "OPEN_SYSTEM") return "OPEN_SYSTEM";
+  if (action.includes("SYSTEM")) return "SYSTEM";
+  if (action.includes("USER")) return "USER";
+  return "SETTINGS";
+}
+
+function auditBadgeClass(action) {
+  const category = auditCategory(action);
+  return {
+    LOGIN: "login",
+    LOGOUT: "logout",
+    OPEN_SYSTEM: "open",
+    SYSTEM: "system",
+    USER: "user",
+    SETTINGS: "settings"
+  }[category] || "settings";
+}
+
+function formatAuditTime(value) {
+  if (!value) return "-";
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return "-";
+  return new Intl.DateTimeFormat("ms-MY", {
+    day: "2-digit", month: "2-digit", year: "numeric",
+    hour: "2-digit", minute: "2-digit", second: "2-digit"
+  }).format(d);
+}
+
+function renderAuditLogs() {
+  const body = $("#auditTableBody");
+  const empty = $("#auditEmpty");
+  if (!body || !empty) return;
+
+  const q = ($("#auditSearch")?.value || "").trim().toLowerCase();
+  const filter = $("#auditActionFilter")?.value || "ALL";
+
+  const filtered = auditLogs.filter(log => {
+    const category = auditCategory(log.action);
+    const matchesFilter = filter === "ALL" || category === filter;
+    const haystack = [
+      log.displayName, log.username, log.action, log.targetName,
+      log.targetType, log.details, auditActionLabel(log.action)
+    ].join(" ").toLowerCase();
+    return matchesFilter && (!q || haystack.includes(q));
+  });
+
+  setText("#auditTotalCount", auditLogs.length);
+  setText("#auditLoginCount", auditLogs.filter(x => x.action === "LOGIN").length);
+  setText("#auditOpenCount", auditLogs.filter(x => x.action === "OPEN_SYSTEM").length);
+  setText("#auditAdminCount", auditLogs.filter(x => ["ADD_SYSTEM","UPDATE_SYSTEM","DELETE_SYSTEM","ADD_USER","UPDATE_USER","DELETE_USER","UPDATE_BRANDING"].includes(x.action)).length);
+
+  empty.classList.toggle("hidden", filtered.length > 0);
+  body.innerHTML = filtered.map(log => `
+    <tr>
+      <td class="history-time"><strong>${safe(formatAuditTime(log.timestamp))}</strong></td>
+      <td>
+        <div class="history-user-cell">
+          <span class="history-user-avatar">${safe(initials(log.displayName || log.username || "IT"))}</span>
+          <div><strong>${safe(log.displayName || "Pengguna")}</strong><span>@${safe(log.username || "-")}</span></div>
+        </div>
+      </td>
+      <td><span class="audit-badge ${auditBadgeClass(log.action)}">${safe(auditActionLabel(log.action))}</span></td>
+      <td><strong>${safe(log.targetName || log.targetType || "Portal")}</strong></td>
+      <td class="history-detail">${safe(log.details || "-")}</td>
+    </tr>
+  `).join("");
+}
+
+async function loadAuditLogs(showMessage = false) {
+  if (session?.user?.role !== "ADMIN") return;
+  const btn = $("#refreshAuditBtn");
+  if (btn) btn.classList.add("is-loading");
+  try {
+    const out = await api("getAuditLogs", { limit: 300 });
+    auditLogs = out.logs || [];
+    renderAuditLogs();
+    if (showMessage) showToast("Sejarah rekod telah disegarkan.");
+  } catch (err) {
+    showToast(err.message, true);
+  } finally {
+    if (btn) btn.classList.remove("is-loading");
+  }
+}
+
+function recordClientActivity(action, data = {}) {
+  if (!session?.token) return;
+  api("recordActivity", { event: { action, ...data } }).catch(() => {});
 }
 
 function openModal(id) { $("#" + id).classList.remove("hidden"); }
@@ -673,6 +790,7 @@ $("#loginForm").addEventListener("submit", async (e) => {
       localStorage.removeItem("rememberedPassword");
     }
     showPortal();
+    recordClientActivity("LOGIN");
   } catch (err) {
     showToast(err.message, true);
   } finally {
@@ -799,6 +917,7 @@ function toggleSettingsPanel(panelId, trigger) {
   if (!wasOpen) {
     target.classList.remove("hidden");
     if (trigger) trigger.classList.add("active");
+    if (panelId === "historyPanel") loadAuditLogs();
   }
 }
 
@@ -807,6 +926,11 @@ $$(".settings-icon-tab").forEach(btn => {
     toggleSettingsPanel(btn.dataset.settingsPanel, btn);
   });
 });
+
+
+$("#refreshAuditBtn")?.addEventListener("click", () => loadAuditLogs(true));
+$("#auditSearch")?.addEventListener("input", renderAuditLogs);
+$("#auditActionFilter")?.addEventListener("change", renderAuditLogs);
 
 $("#systemIconPreset").addEventListener("change", (e) => {
   pendingIconFile = null;
