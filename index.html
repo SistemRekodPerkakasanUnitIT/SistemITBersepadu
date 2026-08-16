@@ -8,7 +8,16 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=7.1.0" />
+  <link rel="stylesheet" href="style.css?v=8.0.0" />
+
+  <link rel="manifest" href="manifest.json?v=8.0.0">
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <meta name="application-name" content="Sistem Bersepadu PKPJ">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Sistem Bersepadu PKPJ">
+
 </head>
 <body>
   <div id="toast" class="toast" aria-live="polite"></div>
@@ -80,6 +89,9 @@
           <span>Log Masuk</span><span class="btn-arrow">&#8594;</span>
         </button>
 
+        <button id="loginInstallAppBtn" class="login-install-btn hidden" type="button">
+          ↓ Install Sistem Bersepadu PKPJ
+        </button>
         <p class="login-note">Akses adalah terhad kepada pengguna yang dibenarkan.</p>
       </form>
     </div>
@@ -120,6 +132,11 @@
           <h2 id="pageTitle">Dashboard</h2>
         </div>
         <div class="topbar-right">
+          <button id="installAppBtn" class="install-app-btn hidden" type="button" title="Pasang aplikasi">
+            <span class="install-app-icon">↓</span>
+            <span>Install App</span>
+          </button>
+
           <div class="date-chip">
             <strong id="topDate">-</strong>
             <span id="topTime">-</span>
@@ -180,46 +197,76 @@
         </section>
 
         <!-- SYSTEM SETTINGS -->
-        <section id="settingsSection" class="view-section hidden admin-only">
-          <div class="section-head">
-            <div><p class="eyebrow">Pentadbiran</p><h3>Tetapan Sistem</h3><p>Urus logo portal, ikon, pautan dan susunan sistem.</p></div>
-            <button id="newSystemBtn" class="primary-btn">+ Tambah Sistem</button>
+        <section id="settingsSection" class="view-section hidden admin-only settings-compact-view">
+
+          <div class="settings-icon-toolbar" aria-label="Tetapan portal">
+            <button class="settings-icon-tab" type="button"
+                    data-settings-panel="brandingPanel"
+                    title="Logo PKPJ" aria-label="Logo PKPJ">
+              <span>◈</span>
+            </button>
+
+            <button class="settings-icon-tab" type="button"
+                    data-settings-panel="systemsPanel"
+                    title="Senarai Sistem" aria-label="Senarai Sistem">
+              <span>▦</span>
+            </button>
           </div>
 
-          <form id="portalLogoForm" class="panel branding-settings-card logo-only-card">
-            <div class="panel-heading">
-              <p class="eyebrow">Branding</p>
-              <h3>Logo PKPJ</h3>
-              <p>Pilih logo untuk paparan login dan sidebar portal.</p>
+          <div id="brandingPanel" class="settings-collapse-panel hidden">
+            <form id="portalLogoForm" class="panel branding-settings-card logo-only-card">
+              <div class="panel-heading">
+                <p class="eyebrow">Branding</p>
+                <h3>Logo PKPJ</h3>
+                <p>Pilih logo untuk paparan login dan sidebar portal.</p>
+              </div>
+
+              <div class="portal-logo-editor">
+                <div id="portalLogoPreview" class="portal-logo-preview"><span>PK</span></div>
+                <div class="portal-logo-actions">
+                  <label class="icon-action-btn upload-icon-only" for="portalLogoFile"
+                         title="Pilih logo" aria-label="Pilih logo">⬆</label>
+                  <input id="portalLogoFile" class="file-input" type="file"
+                         accept="image/png,image/jpeg,image/webp" />
+                  <button id="removePortalLogoBtn" class="icon-action-btn danger-icon"
+                          type="button" title="Buang logo" aria-label="Buang logo">×</button>
+                  <small id="portalLogoFileName">PNG/JPG/WebP, maksimum 2MB</small>
+                </div>
+              </div>
+
+              <div class="settings-actions logo-save-actions">
+                <button id="savePortalLogoBtn" class="primary-btn" type="submit">Simpan Logo</button>
+              </div>
+            </form>
+          </div>
+
+          <div id="systemsPanel" class="settings-collapse-panel hidden">
+            <div class="settings-panel-top">
+              <div>
+                <p class="eyebrow">Pautan Sistem</p>
+                <h3>Senarai Sistem</h3>
+              </div>
+              <button id="newSystemBtn" class="primary-btn">+ Tambah Sistem</button>
             </div>
 
-            <div class="portal-logo-editor">
-              <div id="portalLogoPreview" class="portal-logo-preview"><span>PK</span></div>
-              <div class="portal-logo-actions">
-                <label class="icon-action-btn upload-icon-only" for="portalLogoFile" title="Pilih logo" aria-label="Pilih logo">⬆</label>
-                <input id="portalLogoFile" class="file-input" type="file" accept="image/png,image/jpeg,image/webp" />
-                <button id="removePortalLogoBtn" class="icon-action-btn danger-icon" type="button" title="Buang logo" aria-label="Buang logo">×</button>
-                <small id="portalLogoFileName">PNG/JPG/WebP, maksimum 2MB</small>
+            <div class="panel table-panel">
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Ikon</th>
+                      <th>Nama Sistem</th>
+                      <th>URL</th>
+                      <th>Status</th>
+                      <th>Tindakan</th>
+                    </tr>
+                  </thead>
+                  <tbody id="systemsTableBody"></tbody>
+                </table>
               </div>
             </div>
-
-            <div class="settings-actions logo-save-actions">
-              <button id="savePortalLogoBtn" class="primary-btn" type="submit">Simpan Logo</button>
-            </div>
-          </form>
-
-          <div class="system-list-heading">
-            <div><p class="eyebrow">Pautan Sistem</p><h3>Senarai Sistem</h3></div>
           </div>
 
-          <div class="panel table-panel">
-            <div class="table-wrap">
-              <table>
-                <thead><tr><th>Ikon</th><th>Nama Sistem</th><th>URL</th><th>Status</th><th>Tindakan</th></tr></thead>
-                <tbody id="systemsTableBody"></tbody>
-              </table>
-            </div>
-          </div>
         </section>
 
         <!-- USERS -->
@@ -319,7 +366,7 @@
     </div>
   </div>
 
-  <script src="config.js?v=7.1.0"></script>
-  <script src="app.js?v=7.1.0"></script>
+  <script src="config.js?v=8.0.0"></script>
+  <script src="app.js?v=8.0.0"></script>
 </body>
 </html>
