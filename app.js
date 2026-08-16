@@ -7,6 +7,13 @@ let session = null;
 let systems = [];
 let users = [];
 let pendingIconFile = null;
+let pendingPortalLogoFile = null;
+let portalLogoRemoved = false;
+let portalSettings = {
+  portalLogo: "",
+  loginVideoUrl: cfg.LOGIN_VIDEO_URL || "login.mp4",
+  loginVideoEnabled: cfg.ENABLE_LOGIN_VIDEO !== false
+};
 
 function showToast(message, isError = false) {
   const t = $("#toast");
@@ -116,16 +123,92 @@ function updateClock() {
   $("#greetingText").textContent = hour < 12 ? "Selamat pagi" : hour < 18 ? "Selamat petang" : "Selamat malam";
 }
 
-function initLoginVideo() {
+function applyPortalLogo() {
+  const logo = String(portalSettings.portalLogo || "").trim();
+
+  $$(".portal-logo").forEach((wrap) => {
+    const img = wrap.querySelector(".portal-logo-img");
+    const fallback = wrap.querySelector(".portal-logo-fallback");
+    if (!img || !fallback) return;
+
+    if (logo) {
+      img.src = logo;
+      img.classList.remove("hidden");
+      fallback.classList.add("hidden");
+    } else {
+      img.removeAttribute("src");
+      img.classList.add("hidden");
+      fallback.classList.remove("hidden");
+    }
+  });
+
+  const preview = $("#portalLogoPreview");
+  if (preview) {
+    preview.innerHTML = logo
+      ? `<img src="${safe(logo)}" alt="Logo PKPJ">`
+      : "<span>PK</span>";
+  }
+}
+
+function applyLoginVideo() {
   const video = $("#loginVideo");
   if (!video) return;
-  if (cfg.ENABLE_LOGIN_VIDEO === false || !cfg.LOGIN_VIDEO_URL) {
+
+  const enabled = portalSettings.loginVideoEnabled !== false;
+  const url = String(portalSettings.loginVideoUrl || cfg.LOGIN_VIDEO_URL || "login.mp4").trim();
+
+  video.pause();
+  video.removeAttribute("src");
+
+  if (!enabled || !url) {
     video.classList.add("hidden");
+    video.load();
     return;
   }
-  video.src = cfg.LOGIN_VIDEO_URL;
-  video.addEventListener("error", () => video.classList.add("hidden"));
+
+  video.classList.remove("hidden");
+  video.src = url;
+  video.onerror = () => video.classList.add("hidden");
+  video.load();
   video.play().catch(() => {});
+}
+
+function populatePortalSettingsForm() {
+  if (!$("#portalSettingsForm")) return;
+
+  $("#loginVideoUrl").value = portalSettings.loginVideoUrl || "login.mp4";
+  $("#loginVideoEnabled").checked = portalSettings.loginVideoEnabled !== false;
+  $("#portalLogoFileName").textContent = portalSettings.portalLogo
+    ? "Logo PKPJ semasa telah disimpan"
+    : "PNG/JPG/WebP, maksimum 2MB";
+
+  applyPortalLogo();
+}
+
+async function loadPortalSettings() {
+  try {
+    const out = await api("getPublicSettings");
+    const s = out.settings || {};
+    portalSettings = {
+      portalLogo: String(s.portalLogo || ""),
+      loginVideoUrl: String(s.loginVideoUrl || cfg.LOGIN_VIDEO_URL || "login.mp4"),
+      loginVideoEnabled: s.loginVideoEnabled !== false
+    };
+  } catch (_) {
+    portalSettings = {
+      portalLogo: "",
+      loginVideoUrl: cfg.LOGIN_VIDEO_URL || "login.mp4",
+      loginVideoEnabled: cfg.ENABLE_LOGIN_VIDEO !== false
+    };
+  }
+
+  applyPortalLogo();
+  applyLoginVideo();
+  populatePortalSettingsForm();
+}
+
+function initLoginVideo() {
+  applyLoginVideo();
 }
 
 function showPortal() {
@@ -135,7 +218,10 @@ function showPortal() {
   updateClock();
   setView("dashboard");
   loadSystems();
-  if (session.user.role === "ADMIN") loadUsers();
+  if (session.user.role === "ADMIN") {
+    loadUsers();
+    populatePortalSettingsForm();
+  }
 }
 
 function getAccessStoreKey() {
@@ -389,6 +475,98 @@ async function uploadPendingIcon() {
   return await compressIconFile(pendingIconFile);
 }
 
+
+function compressPortalLogo(file) {
+  return new Promise((resolve, reject) => {
+    const allowed = ["image/png", "image/jpeg", "image/webp"];
+    if (!allowed.includes(file.type)) {
+      reject(new Error("Logo mesti PNG, JPG atau WebP."));
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      reject(new Error("Saiz logo asal maksimum 2MB."));
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error("Fail logo tidak dapat dibaca."));
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = () => reject(new Error("Fail logo tidak sah."));
+      img.onload = () => {
+        const attempts = [
+          { size: 220, quality: .90 },
+          { size: 190, quality: .86 },
+          { size: 160, quality: .82 },
+          { size: 140, quality: .78 },
+          { size: 120, quality: .72 }
+        ];
+
+        for (const opt of attempts) {
+          const canvas = document.createElement("canvas");
+          canvas.width = opt.size;
+          canvas.height = opt.size;
+          const ctx = canvas.getContext("2d");
+          ctx.clearRect(0, 0, opt.size, opt.size);
+
+          const scale = Math.min(opt.size / img.width, opt.size / img.height);
+          const w = Math.max(1, Math.round(img.width * scale));
+          const h = Math.max(1, Math.round(img.height * scale));
+          const x = Math.round((opt.size - w) / 2);
+          const y = Math.round((opt.size - h) / 2);
+          ctx.drawImage(img, x, y, w, h);
+
+          let dataUrl = canvas.toDataURL("image/webp", opt.quality);
+          if (!dataUrl.startsWith("data:image/webp")) {
+            dataUrl = canvas.toDataURL("image/png");
+          }
+
+          if (dataUrl.length <= 42000) {
+            resolve(dataUrl);
+            return;
+          }
+        }
+
+        reject(new Error("Logo masih terlalu besar selepas dikecilkan. Cuba fail logo yang lebih ringkas."));
+      };
+      img.src = String(reader.result);
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function previewPortalLogoData(dataUrl) {
+  const preview = $("#portalLogoPreview");
+  if (!preview) return;
+  preview.innerHTML = dataUrl
+    ? `<img src="${safe(dataUrl)}" alt="Preview Logo PKPJ">`
+    : "<span>PK</span>";
+}
+
+function previewAdminLoginVideo() {
+  const preview = $("#adminVideoPreview");
+  const empty = $("#adminVideoPreviewEmpty");
+  const url = ($("#loginVideoUrl")?.value || "").trim();
+
+  preview.pause();
+  preview.removeAttribute("src");
+
+  if (!url) {
+    empty.classList.remove("hidden");
+    preview.load();
+    return;
+  }
+
+  empty.classList.add("hidden");
+  preview.src = url;
+  preview.onerror = () => {
+    empty.textContent = "Video tidak dapat dimuat. Semak nama fail / URL.";
+    empty.classList.remove("hidden");
+  };
+  preview.load();
+  preview.play().catch(() => {});
+}
+
 function openNewUser() {
   $("#userModalTitle").textContent = "Tambah Staff IT";
   $("#userFormMode").value = "add";
@@ -493,6 +671,85 @@ $("#refreshSystemsBtn").addEventListener("click", () => loadSystems(true));
 $("#dashboardAddSystemBtn").addEventListener("click", openNewSystem);
 $("#newSystemBtn").addEventListener("click", openNewSystem);
 $("#newUserBtn").addEventListener("click", openNewUser);
+
+$("#portalLogoFile").addEventListener("change", (e) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+
+  if (!["image/png", "image/jpeg", "image/webp"].includes(file.type)) {
+    e.target.value = "";
+    showToast("Pilih logo PNG, JPG atau WebP sahaja.", true);
+    return;
+  }
+
+  if (file.size > 2 * 1024 * 1024) {
+    e.target.value = "";
+    showToast("Saiz logo maksimum 2MB.", true);
+    return;
+  }
+
+  pendingPortalLogoFile = file;
+  portalLogoRemoved = false;
+  $("#portalLogoFileName").textContent = file.name;
+
+  const reader = new FileReader();
+  reader.onload = () => previewPortalLogoData(String(reader.result));
+  reader.readAsDataURL(file);
+});
+
+$("#removePortalLogoBtn").addEventListener("click", () => {
+  pendingPortalLogoFile = null;
+  portalLogoRemoved = true;
+  $("#portalLogoFile").value = "";
+  $("#portalLogoFileName").textContent = "Logo akan dibuang selepas Simpan Tetapan";
+  previewPortalLogoData("");
+});
+
+$("#previewLoginVideoBtn").addEventListener("click", previewAdminLoginVideo);
+
+$("#portalSettingsForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const btn = $("#savePortalSettingsBtn");
+  btn.disabled = true;
+  btn.textContent = "Menyimpan...";
+
+  try {
+    let logo = portalSettings.portalLogo || "";
+
+    if (portalLogoRemoved) {
+      logo = "";
+    } else if (pendingPortalLogoFile) {
+      logo = await compressPortalLogo(pendingPortalLogoFile);
+    }
+
+    const settings = {
+      portalLogo: logo,
+      loginVideoUrl: $("#loginVideoUrl").value.trim() || "login.mp4",
+      loginVideoEnabled: $("#loginVideoEnabled").checked
+    };
+
+    const out = await api("updatePortalSettings", { settings });
+    portalSettings = {
+      portalLogo: String(out.settings?.portalLogo || settings.portalLogo || ""),
+      loginVideoUrl: String(out.settings?.loginVideoUrl || settings.loginVideoUrl || "login.mp4"),
+      loginVideoEnabled: out.settings?.loginVideoEnabled !== false
+    };
+
+    pendingPortalLogoFile = null;
+    portalLogoRemoved = false;
+    $("#portalLogoFile").value = "";
+    applyPortalLogo();
+    applyLoginVideo();
+    populatePortalSettingsForm();
+    showToast("Tetapan portal berjaya disimpan.");
+  } catch (err) {
+    showToast(err.message, true);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Simpan Tetapan";
+  }
+});
+
 
 $("#systemIconPreset").addEventListener("change", (e) => {
   pendingIconFile = null;
@@ -601,7 +858,7 @@ $("#changePasswordForm").addEventListener("submit", async (e) => {
 });
 
 (async function init() {
-  initLoginVideo();
+  await loadPortalSettings();
   updateClock();
   setInterval(updateClock, 1000);
 
