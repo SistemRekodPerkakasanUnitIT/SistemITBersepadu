@@ -10,9 +10,7 @@ let pendingIconFile = null;
 let pendingPortalLogoFile = null;
 let portalLogoRemoved = false;
 let portalSettings = {
-  portalLogo: "",
-  loginVideoUrl: cfg.LOGIN_VIDEO_URL || "login.mp4",
-  loginVideoEnabled: cfg.ENABLE_LOGIN_VIDEO !== false
+  portalLogo: ""
 };
 
 function showToast(message, isError = false) {
@@ -154,68 +152,23 @@ function applyLoginVideo() {
   const video = $("#loginVideo");
   if (!video) return;
 
-  const enabled = portalSettings.loginVideoEnabled !== false;
-  const rawUrl = String(
-    portalSettings.loginVideoUrl ||
-    cfg.LOGIN_VIDEO_URL ||
-    "./login.mp4"
-  ).trim();
-
-  if (!enabled || !rawUrl) {
-    video.pause();
-    video.classList.add("hidden");
-    return;
-  }
-
-  // Jika admin simpan "login.mp4", browser akan baca dari folder GitHub Pages semasa.
-  let finalUrl = rawUrl;
-  if (!/^(https?:)?\/\//i.test(rawUrl) && !rawUrl.startsWith("data:")) {
-    try {
-      finalUrl = new URL(rawUrl, window.location.href).href;
-    } catch (_) {
-      finalUrl = rawUrl;
-    }
-  }
-
-  video.classList.remove("hidden");
   video.muted = true;
   video.defaultMuted = true;
   video.loop = true;
   video.autoplay = true;
   video.playsInline = true;
 
-  const current = video.getAttribute("src") || "";
-  if (!current || current !== finalUrl) {
-    video.src = finalUrl;
-  }
-
-  video.onerror = () => {
-    // Cuba fallback terus ke login.mp4 jika URL tetapan gagal.
-    const fallback = new URL("./login.mp4", window.location.href).href;
-    if (video.src !== fallback) {
-      video.src = fallback;
-      video.load();
-      video.play().catch(() => {});
-      return;
-    }
-    video.classList.add("hidden");
-  };
-
-  video.load();
+  // login.mp4 is embedded directly in index.html.
   video.play().catch(() => {
-    // Sesetengah browser hanya benarkan autoplay apabila muted;
-    // muted sudah dipaksa di atas, jadi cubaan kedua biasanya berjaya.
-    setTimeout(() => video.play().catch(() => {}), 250);
+    setTimeout(() => video.play().catch(() => {}), 300);
   });
 }
 
 function populatePortalSettingsForm() {
-  if (!$("#portalSettingsForm")) return;
+  if (!$("#portalLogoForm")) return;
 
-  $("#loginVideoUrl").value = portalSettings.loginVideoUrl || "login.mp4";
-  $("#loginVideoEnabled").checked = portalSettings.loginVideoEnabled !== false;
   $("#portalLogoFileName").textContent = portalSettings.portalLogo
-    ? "Logo PKPJ semasa telah disimpan"
+    ? "Logo semasa telah disimpan"
     : "PNG/JPG/WebP, maksimum 2MB";
 
   applyPortalLogo();
@@ -224,18 +177,11 @@ function populatePortalSettingsForm() {
 async function loadPortalSettings() {
   try {
     const out = await api("getPublicSettings");
-    const s = out.settings || {};
     portalSettings = {
-      portalLogo: String(s.portalLogo || ""),
-      loginVideoUrl: String(s.loginVideoUrl || cfg.LOGIN_VIDEO_URL || "login.mp4"),
-      loginVideoEnabled: s.loginVideoEnabled !== false
+      portalLogo: String(out.settings?.portalLogo || "")
     };
   } catch (_) {
-    portalSettings = {
-      portalLogo: "",
-      loginVideoUrl: cfg.LOGIN_VIDEO_URL || "login.mp4",
-      loginVideoEnabled: cfg.ENABLE_LOGIN_VIDEO !== false
-    };
+    portalSettings = { portalLogo: "" };
   }
 
   applyPortalLogo();
@@ -310,31 +256,32 @@ function getActiveSystems() {
 function renderDashboardSystems() {
   const active = getActiveSystems();
   const history = getAccessHistory();
-  const q = ($("#systemSearch")?.value || "").trim().toLowerCase();
-  const filtered = active.filter(s => `${s.name || ""} ${s.description || ""}`.toLowerCase().includes(q));
-
-  $("#systemCount").textContent = active.length;
-  $("#activeSystemCount").textContent = active.length;
-  $("#inactiveSystemCount").textContent = systems.filter(s => String(s.status).toUpperCase() !== "ACTIVE").length;
 
   $("#emptySystems").classList.toggle("hidden", active.length > 0);
-  $("#noSearchResults").classList.toggle("hidden", active.length === 0 || filtered.length > 0 || !q);
   $("#systemGrid").classList.toggle("hidden", active.length === 0);
 
-  $("#systemGrid").innerHTML = filtered.map(s => `
-    <article class="system-card">
+  $("#systemGrid").innerHTML = active.map((s, index) => `
+    <article class="system-card card-theme-${(index % 6) + 1}">
+      <div class="card-accent"></div>
+
       <div class="system-card-top">
         <div class="system-icon">${iconMarkup(s.icon)}</div>
-        <span class="status-pill">Aktif</span>
+        <span class="status-pill">AKTIF</span>
       </div>
-      <h3>${safe(s.name)}</h3>
-      <p>${safe(s.description || "Akses sistem melalui pautan web.")}</p>
+
+      <div class="system-card-body">
+        <h3>${safe(s.name)}</h3>
+        <p>${safe(s.description || "Akses sistem melalui pautan web.")}</p>
+      </div>
+
       <div class="system-meta">
         <span class="last-access">Akses terakhir: ${safe(formatDateTime(history[String(s.id)]))}</span>
       </div>
+
       <div class="system-actions">
-        <a class="open-btn" href="${safe(s.url)}" target="_blank" rel="noopener noreferrer" onclick="recordSystemAccess('${safe(s.id)}')">
-          <span>Buka Sistem</span><span>↗</span>
+        <a class="open-btn" href="${safe(s.url)}" target="_blank" rel="noopener noreferrer"
+           onclick="recordSystemAccess('${safe(s.id)}')">
+          <span>Buka Sistem</span><span class="open-arrow">↗</span>
         </a>
       </div>
     </article>
@@ -353,8 +300,8 @@ function renderSystems() {
       <td class="url-cell" title="${safe(s.url)}">${safe(s.url)}</td>
       <td><span class="status-pill ${s.status === "ACTIVE" ? "" : "inactive"}">${s.status === "ACTIVE" ? "Aktif" : "Tidak Aktif"}</span></td>
       <td><div class="row-actions">
-        <button class="small-btn edit" onclick="editSystem('${safe(s.id)}')">Kemaskini</button>
-        <button class="small-btn delete" onclick="deleteSystem('${safe(s.id)}','${safe(s.name)}')">Padam</button>
+        <button class="small-btn icon-only edit" title="Kemaskini" aria-label="Kemaskini" onclick="editSystem('${safe(s.id)}')">✎</button>
+        <button class="small-btn icon-only delete" title="Padam" aria-label="Padam" onclick="deleteSystem('${safe(s.id)}','${safe(s.name)}')">⌫</button>
       </div></td>
     </tr>
   `).join("");
@@ -371,7 +318,7 @@ async function loadUsers() {
 }
 
 function renderUsers() {
-  $("#staffCount").textContent = users.filter(u => u.role !== "ADMIN").length;
+  if ($("#staffCount")) $("#staffCount").textContent = users.filter(u => u.role !== "ADMIN").length;
   $("#usersTableBody").innerHTML = users.map(u => {
     const canDelete = u.role !== "ADMIN" && String(u.id) !== String(session.user.id);
     return `
@@ -381,8 +328,8 @@ function renderUsers() {
         <td>${roleLabel(u.role)}</td>
         <td><span class="status-pill ${u.status === "ACTIVE" ? "" : "inactive"}">${u.status === "ACTIVE" ? "Aktif" : "Tidak Aktif"}</span></td>
         <td><div class="row-actions">
-          <button class="small-btn edit" onclick="editUser('${safe(u.id)}')">Kemaskini</button>
-          ${canDelete ? `<button class="small-btn delete" onclick="deleteUser('${safe(u.id)}','${safe(u.displayName)}')">Padam</button>` : ""}
+          <button class="small-btn icon-only edit" title="Kemaskini" aria-label="Kemaskini" onclick="editUser('${safe(u.id)}')">✎</button>
+          ${canDelete ? `<button class="small-btn icon-only delete" title="Padam" aria-label="Padam" onclick="deleteUser('${safe(u.id)}','${safe(u.displayName)}')">⌫</button>` : ""}
         </div></td>
       </tr>
     `;
@@ -579,29 +526,6 @@ function previewPortalLogoData(dataUrl) {
     : "<span>PK</span>";
 }
 
-function previewAdminLoginVideo() {
-  const preview = $("#adminVideoPreview");
-  const empty = $("#adminVideoPreviewEmpty");
-  const url = ($("#loginVideoUrl")?.value || "").trim();
-
-  preview.pause();
-  preview.removeAttribute("src");
-
-  if (!url) {
-    empty.classList.remove("hidden");
-    preview.load();
-    return;
-  }
-
-  empty.classList.add("hidden");
-  preview.src = url;
-  preview.onerror = () => {
-    empty.textContent = "Video tidak dapat dimuat. Semak nama fail / URL.";
-    empty.classList.remove("hidden");
-  };
-  preview.load();
-  preview.play().catch(() => {});
-}
 
 function openNewUser() {
   $("#userModalTitle").textContent = "Tambah Staff IT";
@@ -702,7 +626,6 @@ $("#mobileLogoutBtn").addEventListener("click", logoutPortal);
 $$(".nav-btn[data-view]").forEach(btn => btn.addEventListener("click", () => setView(btn.dataset.view)));
 $$('[data-close-modal]').forEach(btn => btn.addEventListener("click", () => closeModal(btn.dataset.closeModal)));
 
-$("#systemSearch").addEventListener("input", renderDashboardSystems);
 $("#refreshSystemsBtn").addEventListener("click", () => loadSystems(true));
 $("#dashboardAddSystemBtn").addEventListener("click", openNewSystem);
 $("#newSystemBtn").addEventListener("click", openNewSystem);
@@ -741,11 +664,10 @@ $("#removePortalLogoBtn").addEventListener("click", () => {
   previewPortalLogoData("");
 });
 
-$("#previewLoginVideoBtn").addEventListener("click", previewAdminLoginVideo);
 
-$("#portalSettingsForm").addEventListener("submit", async (e) => {
+$("#portalLogoForm").addEventListener("submit", async (e) => {
   e.preventDefault();
-  const btn = $("#savePortalSettingsBtn");
+  const btn = $("#savePortalLogoBtn");
   btn.disabled = true;
   btn.textContent = "Menyimpan...";
 
@@ -758,31 +680,34 @@ $("#portalSettingsForm").addEventListener("submit", async (e) => {
       logo = await compressPortalLogo(pendingPortalLogoFile);
     }
 
+    // Kekalkan nilai video backend sekadar kompatibiliti,
+    // tetapi frontend tidak lagi menggunakan tetapan video ini.
+    const current = await api("getPublicSettings").catch(() => ({ settings: {} }));
+
     const settings = {
       portalLogo: logo,
-      loginVideoUrl: $("#loginVideoUrl").value.trim() || "login.mp4",
-      loginVideoEnabled: $("#loginVideoEnabled").checked
+      loginVideoUrl: String(current.settings?.loginVideoUrl || "login.mp4"),
+      loginVideoEnabled: true
     };
 
-    const out = await api("updatePortalSettings", { settings });
+    const saved = await api("updatePortalSettings", { settings });
+
     portalSettings = {
-      portalLogo: String(out.settings?.portalLogo || settings.portalLogo || ""),
-      loginVideoUrl: String(out.settings?.loginVideoUrl || settings.loginVideoUrl || "login.mp4"),
-      loginVideoEnabled: out.settings?.loginVideoEnabled !== false
+      portalLogo: String(saved.settings?.portalLogo || logo || "")
     };
 
     pendingPortalLogoFile = null;
     portalLogoRemoved = false;
     $("#portalLogoFile").value = "";
+
     applyPortalLogo();
-    applyLoginVideo();
     populatePortalSettingsForm();
-    showToast("Tetapan portal berjaya disimpan.");
+    showToast("Logo portal berjaya disimpan.");
   } catch (err) {
     showToast(err.message, true);
   } finally {
     btn.disabled = false;
-    btn.textContent = "Simpan Tetapan";
+    btn.textContent = "Simpan Logo";
   }
 });
 
