@@ -1,3 +1,4 @@
+
 :root{
   --ink:#10254a;
   --ink-2:#1e385f;
@@ -811,3 +812,223 @@ td{font-size:11px}
 .video-fallback{z-index:0 !important}
 .video-overlay{z-index:2 !important}
 .login-visual-content{z-index:3 !important}
+
+
+/* ==========================================================
+   V7.2 — SETTINGS ICON ACCORDION + SYSTEM IMAGE BACKGROUND
+   ========================================================== */
+
+/* Settings starts as icon-only */
+.settings-compact-view{
+  padding-top:2px;
+}
+.settings-icon-toolbar{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  min-height:54px;
+  margin-bottom:12px;
+}
+.settings-icon-tab{
+  width:48px;
+  height:48px;
+  padding:0;
+  border:1px solid #d9e5ef;
+  border-radius:14px;
+  background:#fff;
+  color:#55718e;
+  display:grid;
+  place-items:center;
+  font-size:22px;
+  cursor:pointer;
+  box-shadow:0 6px 18px rgba(27,65,99,.055);
+  transition:transform .18s ease,box-shadow .18s ease,color .18s ease,
+             border-color .18s ease,background .18s ease;
+}
+.settings-icon-tab:hover{
+  transform:translateY(-2px);
+  color:#176dd1;
+  border-color:#bdd9f5;
+  box-shadow:0 10px 24px rgba(27,81,137,.10);
+}
+.settings-icon-tab.active{
+  color:#fff;
+  border-color:transparent;
+  background:linear-gradient(135deg,#277be7,#625ee7);
+  box-shadow:0 10px 24px rgba(45,95,205,.22);
+}
+.settings-collapse-panel{
+  animation:settingsPanelIn .18s ease both;
+}
+@keyframes settingsPanelIn{
+  from{opacity:0;transform:translateY(-5px)}
+  to{opacity:1;transform:translateY(0)}
+}
+.settings-panel-top{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:14px;
+  margin:0 0 10px;
+}
+.settings-panel-top h3{
+  margin:2px 0 0;
+  font-size:19px;
+  color:#143152;
+}
+
+/* Dashboard cards — uploaded image is the card background */
+.system-card{
+  isolation:isolate;
+}
+.system-bg-layer,
+.system-bg-overlay{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+}
+.system-bg-layer{
+  z-index:0;
+  background-image:var(--system-bg-image);
+  background-size:cover;
+  background-position:center;
+  background-repeat:no-repeat;
+  opacity:0;
+  transform:scale(1.01);
+  transition:transform .28s ease,opacity .2s ease;
+}
+.system-card.has-system-bg .system-bg-layer{
+  opacity:1;
+}
+.system-bg-overlay{
+  z-index:1;
+  background:
+    linear-gradient(180deg,rgba(8,24,43,.08) 0%,rgba(8,24,43,.25) 42%,rgba(8,24,43,.88) 100%);
+  opacity:0;
+}
+.system-card.has-system-bg .system-bg-overlay{
+  opacity:1;
+}
+.system-card.has-system-bg{
+  background:#163451;
+  border-color:rgba(255,255,255,.08);
+}
+.system-card.has-system-bg:hover .system-bg-layer{
+  transform:scale(1.055);
+}
+.system-card.has-system-bg .card-accent{
+  opacity:.8;
+}
+.system-card.has-system-bg .system-card-top,
+.system-card.has-system-bg .system-card-body,
+.system-card.has-system-bg .system-meta,
+.system-card.has-system-bg .system-actions{
+  position:relative;
+  z-index:3;
+}
+.system-card.has-system-bg .system-card-body h3{
+  color:#fff;
+  text-shadow:0 2px 8px rgba(0,0,0,.25);
+}
+.system-card.has-system-bg .system-card-body p{
+  color:rgba(255,255,255,.82);
+}
+.system-card.has-system-bg .last-access{
+  color:rgba(255,255,255,.68);
+}
+.system-card.has-system-bg .status-pill{
+  color:#fff;
+  background:rgba(10,28,48,.42);
+  border-color:rgba(255,255,255,.22);
+  backdrop-filter:blur(8px);
+}
+.system-card.has-system-bg .card-priority{
+  color:rgba(255,255,255,.72);
+}
+.system-card.has-system-bg .open-btn{
+  background:rgba(255,255,255,.94);
+  color:#163552;
+  box-shadow:0 8px 20px rgba(0,0,0,.15);
+}
+.system-card.has-system-bg .open-btn:hover{
+  background:#fff;
+  color:#0c2c4d;
+}
+.system-card.has-system-bg .open-arrow{
+  background:rgba(18,55,91,.10);
+}
+
+/* Small dashboard icon box no longer exists */
+.priority-grid .system-icon{
+  display:none !important;
+}
+
+@media(max-width:680px){
+  .settings-icon-toolbar{
+    position:sticky;
+    top:0;
+    z-index:15;
+    padding:6px 0;
+    background:rgba(246,249,252,.92);
+    backdrop-filter:blur(8px);
+  }
+  .settings-panel-top{
+    align-items:stretch;
+    flex-direction:column;
+  }
+  .settings-panel-top .primary-btn{
+    width:100%;
+  }
+}
+
+
+/* ==========================================================
+   V8 — INSTALLABLE PWA
+   ========================================================== */
+.install-app-btn{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  min-height:36px;
+  padding:8px 11px;
+  border:1px solid #d7e5f0;
+  border-radius:11px;
+  background:#fff;
+  color:#1b5ea8;
+  font-size:9px;
+  font-weight:800;
+  cursor:pointer;
+  box-shadow:0 5px 16px rgba(31,76,114,.06);
+}
+.install-app-btn:hover{
+  border-color:#b9d6f1;
+  background:#f7fbff;
+}
+.install-app-icon{
+  width:21px;
+  height:21px;
+  display:grid;
+  place-items:center;
+  border-radius:7px;
+  background:#eaf4ff;
+  font-size:12px;
+}
+.login-install-btn{
+  width:100%;
+  margin-top:8px;
+  padding:9px 12px;
+  border:1px solid rgba(31,111,213,.18);
+  border-radius:10px;
+  background:#f3f8ff;
+  color:#1967b7;
+  font-size:9px;
+  font-weight:800;
+  cursor:pointer;
+}
+.login-install-btn:hover{
+  background:#eaf4ff;
+}
+@media(max-width:680px){
+  .install-app-btn span:last-child{display:none}
+  .install-app-btn{padding:7px}
+}
