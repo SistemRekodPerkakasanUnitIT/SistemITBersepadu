@@ -239,3 +239,83 @@ a{color:inherit}
   .settings-actions{flex-direction:column-reverse}
   .settings-actions button{width:100%}
 }
+
+
+/* ==========================================================
+   V5 — DASHBOARD TYPOGRAPHY BALANCE
+   Lebih mudah dibaca tetapi kekal compact.
+   ========================================================== */
+
+/* Sidebar */
+.side-brand strong{font-size:15px}
+.side-brand span{font-size:10px}
+.nav-btn{font-size:12px}
+.role-card small{font-size:9px}
+.role-card strong{font-size:11px}
+
+/* Top bar */
+.topbar h2{font-size:19px}
+.date-chip strong{font-size:10px}
+.date-chip span{font-size:9px}
+.user-chip strong{font-size:11px}
+.user-chip span{font-size:9px}
+
+/* Hero */
+.hero-kicker{font-size:9px}
+.premium-hero h1{font-size:clamp(28px,3.2vw,38px)}
+.premium-hero p{font-size:12px;line-height:1.65}
+
+/* Summary cards */
+.summary-card span{font-size:10px}
+.summary-card strong{font-size:31px}
+.summary-card small{font-size:9px}
+
+/* Dashboard section headings */
+.section-title-row h3{font-size:19px}
+.last-updated{font-size:9px}
+.system-search-wrap input{font-size:11px}
+
+/* System cards */
+.system-card h3{font-size:15px;line-height:1.35}
+.system-card p{font-size:10.5px;line-height:1.55}
+.status-pill,.pill{font-size:9px}
+.last-access{font-size:8px}
+.open-btn{font-size:10px;padding:9px 10px}
+
+/* Admin settings / tables */
+.section-head h3{font-size:22px}
+.section-head p{font-size:11px}
+th{font-size:9px}
+td{font-size:11px}
+.small-btn{font-size:9px}
+.form-grid input,.form-grid textarea,.form-grid select{font-size:11px}
+.form-grid label{font-size:10px}
+.form-help{font-size:9px}
+
+/* Mobile: naikkan sedikit tulisan juga */
+@media(max-width:680px){
+  .topbar h2{font-size:17px}
+  .premium-hero h1{font-size:26px}
+  .premium-hero p{font-size:10px}
+  .summary-card span{font-size:8px}
+  .summary-card strong{font-size:25px}
+  .summary-card small{font-size:7.5px}
+  .section-title-row h3{font-size:16px}
+  .system-card h3{font-size:14px}
+  .system-card p{font-size:9.5px}
+  .open-btn{font-size:9px}
+  .nav-btn>span:last-child{font-size:8px}
+}
+
+
+/* V5 — LOGIN VIDEO */
+.login-video{
+  object-fit:cover;
+  object-position:center;
+  filter:saturate(1.05) contrast(1.02);
+}
+.video-overlay{
+  background:
+    linear-gradient(90deg,rgba(4,20,43,.56),rgba(4,20,43,.20) 62%,rgba(4,20,43,.08)),
+    linear-gradient(180deg,rgba(5,20,45,.18),rgba(5,20,45,.55));
+}
