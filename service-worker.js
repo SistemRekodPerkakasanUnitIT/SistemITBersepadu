@@ -1,11 +1,11 @@
-const CACHE_NAME = "pkpj-portal-v8";
+const CACHE_NAME = "pkpj-portal-v8-1";
 const APP_SHELL = [
   "./",
   "./index.html",
-  "./style.css?v=8.0.0",
-  "./config.js?v=8.0.0",
-  "./app.js?v=8.0.0",
-  "./manifest.json?v=8.0.0",
+  "./style.css?v=8.1.0",
+  "./config.js?v=8.1.0",
+  "./app.js?v=8.1.0",
+  "./manifest.json?v=8.1.0",
   "./icons/icon-192.png",
   "./icons/icon-512.png"
 ];
