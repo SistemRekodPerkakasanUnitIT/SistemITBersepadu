@@ -2,227 +2,234 @@
 <html lang="ms">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#071a36" />
   <title>Sistem Bersepadu PKPJ</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div id="toast" class="toast" aria-live="polite"></div>
 
+  <!-- LOGIN -->
   <section id="loginView" class="login-shell">
-    <div class="login-brand">
-      <div class="brand-mark">PK</div>
-      <div>
-        <h1>SISTEM BERSEPADU</h1>
-        <p>Portal Utama Unit IT PKPJ</p>
-      </div>
-      <div class="brand-copy">
-        <h2>Satu portal, semua sistem.</h2>
-        <p>Log masuk sekali untuk mengakses sistem dalaman yang telah dipautkan oleh pentadbir.</p>
+    <div class="login-visual">
+      <video id="loginVideo" class="login-video" autoplay muted loop playsinline preload="metadata"></video>
+      <div class="video-fallback"></div>
+      <div class="video-overlay"></div>
+      <div class="login-visual-content">
+        <div class="brand-lockup">
+          <div class="brand-mark">PK</div>
+          <div>
+            <strong>SISTEM BERSEPADU</strong>
+            <span>Portal Utama Unit IT PKPJ</span>
+          </div>
+        </div>
+        <div class="login-message">
+          <span class="glass-chip">PORTAL DALAMAN</span>
+          <h1>Satu akses.<br>Semua sistem.</h1>
+          <p>Pusat akses pantas untuk sistem dalaman Unit IT PKPJ.</p>
+        </div>
+        <div class="visual-footer">Unit Teknologi Maklumat &bull; PKPJ</div>
       </div>
     </div>
 
     <div class="login-panel">
-      <form id="loginForm" class="login-card">
+      <form id="loginForm" class="login-card" autocomplete="on">
         <div class="mobile-brand">
           <div class="brand-mark small">PK</div>
-          <div><strong>SISTEM BERSEPADU</strong><span>Portal Utama</span></div>
+          <div><strong>SISTEM BERSEPADU</strong><span>Portal Utama Unit IT PKPJ</span></div>
         </div>
-        <h2>Log Masuk</h2>
-        <p class="muted">Masukkan nama pengguna dan kata laluan.</p>
+
+        <div class="login-heading">
+          <p class="eyebrow">Selamat Datang</p>
+          <h2>Log masuk ke portal</h2>
+          <p class="muted">Gunakan akaun yang telah didaftarkan oleh pentadbir.</p>
+        </div>
 
         <label for="username">Nama Pengguna</label>
-        <input id="username" name="username" type="text" autocomplete="username" placeholder="Contoh: it.pkpj" required />
+        <div class="input-shell">
+          <span class="field-icon">@</span>
+          <input id="username" name="username" type="text" autocomplete="username" placeholder="Nama pengguna" required />
+        </div>
 
         <label for="password">Kata Laluan</label>
-        <div class="password-wrap">
-          <input id="password" name="password" type="password" autocomplete="current-password" placeholder="Masukkan kata laluan" required />
-          <button id="togglePassword" class="icon-btn" type="button" aria-label="Papar kata laluan">👁</button>
+        <div class="input-shell password-wrap">
+          <span class="field-icon">&#8226;</span>
+          <input id="password" name="password" type="password" autocomplete="current-password" placeholder="Kata laluan" required />
+          <button id="togglePassword" class="icon-btn" type="button" aria-label="Papar kata laluan">Lihat</button>
         </div>
 
         <label class="remember-row">
           <input id="rememberMe" type="checkbox" />
-          <span>Ingat nama pengguna & kata laluan</span>
+          <span>Ingat nama pengguna &amp; kata laluan pada peranti ini</span>
         </label>
 
-        <button id="loginBtn" class="primary-btn full" type="submit">Log Masuk</button>
+        <button id="loginBtn" class="primary-btn full login-submit" type="submit">
+          <span>Log Masuk</span><span class="btn-arrow">&#8594;</span>
+        </button>
 
-        <div class="demo-info">
-          <strong>Akaun permulaan</strong>
-          <span>Admin: <code>admin</code> / <code>admin</code></span>
-          <span>Staff IT: <code>it.pkpj</code> / <code>1234</code></span>
-        </div>
+        <p class="login-note">Akses adalah terhad kepada pengguna yang dibenarkan.</p>
       </form>
     </div>
   </section>
 
+  <!-- PORTAL -->
   <section id="portalView" class="portal hidden">
     <aside class="sidebar">
       <div class="side-brand">
         <div class="brand-mark small">PK</div>
-        <div><strong>SISTEM BERSEPADU</strong><span>Portal Utama</span></div>
+        <div><strong>SISTEM BERSEPADU</strong><span>Unit IT PKPJ</span></div>
       </div>
 
-      <nav>
-        <button class="nav-btn active" data-view="dashboard">⌂ <span>Dashboard</span></button>
-        <button id="settingsNav" class="nav-btn admin-only" data-view="settings">⚙ <span>Tetapan Sistem</span></button>
-        <button id="usersNav" class="nav-btn admin-only" data-view="users">👥 <span>Pengguna</span></button>
-        <button class="nav-btn" data-view="profile">👤 <span>Profil</span></button>
+      <nav class="side-nav">
+        <button class="nav-btn active" data-view="dashboard"><span class="nav-icon">&#8962;</span><span>Dashboard</span></button>
+        <button id="settingsNav" class="nav-btn admin-only" data-view="settings"><span class="nav-icon">&#9881;</span><span>Sistem</span></button>
+        <button id="usersNav" class="nav-btn admin-only" data-view="users"><span class="nav-icon">&#9823;</span><span>Pengguna</span></button>
+        <button class="nav-btn" data-view="profile"><span class="nav-icon">&#9673;</span><span>Profil</span></button>
+        <button id="mobileLogoutBtn" class="nav-btn mobile-only danger"><span class="nav-icon">&#8618;</span><span>Keluar</span></button>
       </nav>
 
       <div class="side-bottom">
         <div class="role-card">
-          <small>Peranan</small>
-          <strong id="sidebarRole">-</strong>
+          <span class="online-dot"></span>
+          <div><small>Sesi Aktif</small><strong id="sidebarRole">-</strong></div>
         </div>
-        <button id="logoutBtn" class="nav-btn danger">↪ <span>Log Keluar</span></button>
+        <button id="logoutBtn" class="nav-btn danger"><span class="nav-icon">&#8618;</span><span>Log Keluar</span></button>
       </div>
     </aside>
 
     <main class="main">
       <header class="topbar">
         <div>
-          <p class="eyebrow">Portal Utama</p>
+          <p class="eyebrow">Sistem Bersepadu PKPJ</p>
           <h2 id="pageTitle">Dashboard</h2>
         </div>
-        <div class="user-chip">
-          <div class="avatar">IT</div>
-          <div>
-            <strong id="topName">Pengguna</strong>
-            <span id="topRole">-</span>
+        <div class="topbar-right">
+          <div class="date-chip">
+            <strong id="topDate">-</strong>
+            <span id="topTime">-</span>
+          </div>
+          <div class="user-chip">
+            <div class="avatar" id="topAvatar">IT</div>
+            <div><strong id="topName">Pengguna</strong><span id="topRole">-</span></div>
           </div>
         </div>
       </header>
 
       <div class="content">
+        <!-- DASHBOARD -->
         <section id="dashboardSection" class="view-section">
-          <div class="hero dashboard-hero">
-            <div>
-              <p class="eyebrow">Selamat datang</p>
-              <h1 id="welcomeName">Pengguna</h1>
-              <p>Pilih sistem di bawah untuk mula mengakses.</p>
+          <div class="premium-hero">
+            <div class="hero-glow hero-glow-one"></div>
+            <div class="hero-glow hero-glow-two"></div>
+            <div class="hero-content">
+              <span class="hero-kicker">PORTAL AKSES SISTEM</span>
+              <h1><span id="greetingText">Selamat datang</span>, <span id="welcomeName">Pengguna</span>.</h1>
+              <p>Akses semua sistem Unit IT melalui satu dashboard yang ringkas dan tersusun.</p>
+              <div class="hero-actions">
+                <button id="dashboardAddSystemBtn" class="light-btn admin-only">+ Tambah Sistem</button>
+                <button id="refreshSystemsBtn" class="glass-btn">&#8635; Segarkan</button>
+              </div>
             </div>
-            <div class="hero-actions">
-              <button id="dashboardAddSystemBtn" class="primary-btn admin-only">+ Tambah Sistem</button>
-              <button id="refreshSystemsBtn" class="ghost-btn">↻ Refresh</button>
+            <div class="hero-orbit" aria-hidden="true">
+              <div class="orbit-core">IT</div>
+              <span class="orbit-dot dot-a"></span>
+              <span class="orbit-dot dot-b"></span>
+              <span class="orbit-dot dot-c"></span>
             </div>
           </div>
 
           <div class="dashboard-summary">
-            <div class="summary-card">
-              <span class="summary-icon">🔗</span>
-              <div><strong id="systemCount">0</strong><span>Sistem tersedia</span></div>
-            </div>
-            <div class="summary-card admin-only">
-              <span class="summary-icon">✓</span>
-              <div><strong id="activeSystemCount">0</strong><span>Sistem aktif</span></div>
-            </div>
-            <div class="summary-card admin-only">
-              <span class="summary-icon">○</span>
-              <div><strong id="inactiveSystemCount">0</strong><span>Tidak aktif</span></div>
-            </div>
+            <article class="summary-card">
+              <div class="summary-icon blue">&#8599;</div>
+              <div><span>Sistem Tersedia</span><strong id="systemCount">0</strong></div>
+              <small>akses aktif</small>
+            </article>
+            <article class="summary-card admin-only">
+              <div class="summary-icon green">&#10003;</div>
+              <div><span>Sistem Aktif</span><strong id="activeSystemCount">0</strong></div>
+              <small>dipaparkan</small>
+            </article>
+            <article class="summary-card admin-only">
+              <div class="summary-icon violet">&#9823;</div>
+              <div><span>Akaun Staff</span><strong id="staffCount">0</strong></div>
+              <small>berdaftar</small>
+            </article>
+            <article class="summary-card admin-only">
+              <div class="summary-icon amber">&#8212;</div>
+              <div><span>Tidak Aktif</span><strong id="inactiveSystemCount">0</strong></div>
+              <small>disembunyikan</small>
+            </article>
+          </div>
+
+          <div class="section-title-row">
+            <div><p class="eyebrow">Akses Pantas</p><h3>Sistem Anda</h3></div>
+            <div class="last-updated" id="lastUpdated">Belum disegarkan</div>
           </div>
 
           <div class="dashboard-toolbar">
             <div class="system-search-wrap">
-              <span>⌕</span>
-              <input id="systemSearch" type="search" placeholder="Cari nama atau penerangan sistem..." autocomplete="off" />
+              <span class="search-icon">&#9906;</span>
+              <input id="systemSearch" type="search" placeholder="Cari sistem..." autocomplete="off" />
             </div>
-            <div id="lastUpdated" class="last-updated">Belum disegarkan</div>
           </div>
 
           <div id="systemGrid" class="system-grid"></div>
           <div id="noSearchResults" class="empty-state hidden">
-            <div class="empty-icon">🔎</div>
-            <h3>Sistem tidak ditemui</h3>
-            <p>Cuba kata carian yang lain.</p>
+            <div class="empty-icon">&#9906;</div><h3>Sistem tidak ditemui</h3><p>Cuba kata carian yang lain.</p>
           </div>
           <div id="emptySystems" class="empty-state hidden">
-            <div class="empty-icon">🔗</div>
-            <h3>Tiada sistem aktif</h3>
-            <p>Hubungi pentadbir untuk menambah pautan sistem.</p>
+            <div class="empty-icon">&#8599;</div><h3>Tiada sistem aktif</h3><p>Hubungi pentadbir untuk menambah pautan sistem.</p>
           </div>
         </section>
 
+        <!-- SYSTEM SETTINGS -->
         <section id="settingsSection" class="view-section hidden admin-only">
           <div class="section-head">
-            <div>
-              <h3>Tetapan Sistem</h3>
-              <p>Tambah, kemas kini atau buang sistem yang dipaparkan di dashboard.</p>
-            </div>
+            <div><p class="eyebrow">Pentadbiran</p><h3>Tetapan Sistem</h3><p>Urus nama, URL, ikon, status dan susunan sistem pada dashboard.</p></div>
             <button id="newSystemBtn" class="primary-btn">+ Tambah Sistem</button>
           </div>
-
-          <div class="panel">
+          <div class="panel table-panel">
             <div class="table-wrap">
               <table>
-                <thead>
-                  <tr>
-                    <th>Ikon</th>
-                    <th>Nama Sistem</th>
-                    <th>URL</th>
-                    <th>Status</th>
-                    <th>Tindakan</th>
-                  </tr>
-                </thead>
+                <thead><tr><th>Ikon</th><th>Nama Sistem</th><th>URL</th><th>Status</th><th>Tindakan</th></tr></thead>
                 <tbody id="systemsTableBody"></tbody>
               </table>
             </div>
           </div>
         </section>
 
+        <!-- USERS -->
         <section id="usersSection" class="view-section hidden admin-only">
           <div class="section-head">
-            <div>
-              <h3>Pengurusan Pengguna</h3>
-              <p>Admin boleh menetapkan semula nama pengguna, kata laluan dan status akaun.</p>
-            </div>
+            <div><p class="eyebrow">Pentadbiran</p><h3>Pengurusan Pengguna</h3><p>Tambah Staff IT, kemas kini username/password atau padam akaun.</p></div>
+            <button id="newUserBtn" class="primary-btn">+ Tambah Staff</button>
           </div>
-          <div class="panel">
+          <div class="panel table-panel">
             <div class="table-wrap">
               <table>
-                <thead>
-                  <tr>
-                    <th>Nama</th>
-                    <th>Nama Pengguna</th>
-                    <th>Peranan</th>
-                    <th>Status</th>
-                    <th>Tindakan</th>
-                  </tr>
-                </thead>
+                <thead><tr><th>Nama</th><th>Nama Pengguna</th><th>Peranan</th><th>Status</th><th>Tindakan</th></tr></thead>
                 <tbody id="usersTableBody"></tbody>
               </table>
             </div>
           </div>
         </section>
 
+        <!-- PROFILE -->
         <section id="profileSection" class="view-section hidden">
           <div class="profile-card panel">
-            <div class="avatar large">IT</div>
-            <div>
-              <p class="eyebrow">Akaun Semasa</p>
-              <h3 id="profileName">-</h3>
-              <p id="profileUsername" class="muted">-</p>
-              <span id="profileRole" class="pill">-</span>
-            </div>
+            <div class="avatar large" id="profileAvatar">IT</div>
+            <div><p class="eyebrow">Akaun Semasa</p><h3 id="profileName">-</h3><p id="profileUsername" class="muted">-</p><span id="profileRole" class="pill">-</span></div>
           </div>
           <div class="panel profile-actions">
-            <h3>Tukar Kata Laluan</h3>
+            <div class="panel-heading"><h3>Tukar Kata Laluan</h3><p>Kemas kini kata laluan akaun semasa.</p></div>
             <form id="changePasswordForm" class="form-grid compact">
-              <div>
-                <label for="currentPassword">Kata laluan semasa</label>
-                <input id="currentPassword" type="password" required />
-              </div>
-              <div>
-                <label for="newPassword">Kata laluan baharu</label>
-                <input id="newPassword" type="password" minlength="4" required />
-              </div>
-              <div class="form-actions">
-                <button class="primary-btn" type="submit">Kemaskini Kata Laluan</button>
-              </div>
+              <div><label for="currentPassword">Kata laluan semasa</label><input id="currentPassword" type="password" required /></div>
+              <div><label for="newPassword">Kata laluan baharu</label><input id="newPassword" type="password" minlength="4" required /></div>
+              <div class="form-actions"><button class="primary-btn" type="submit">Kemaskini Kata Laluan</button></div>
             </form>
           </div>
         </section>
@@ -230,88 +237,64 @@
     </main>
   </section>
 
+  <!-- SYSTEM MODAL -->
   <div id="systemModal" class="modal-backdrop hidden">
     <div class="modal">
       <div class="modal-head">
         <div><p class="eyebrow">Pentadbir</p><h3 id="systemModalTitle">Tambah Sistem</h3></div>
-        <button class="icon-btn" data-close-modal="systemModal">✕</button>
+        <button class="icon-btn modal-close" type="button" data-close-modal="systemModal">&#10005;</button>
       </div>
       <form id="systemForm" class="form-grid">
         <input id="systemId" type="hidden" />
-        <div>
-          <label for="systemName">Nama Sistem</label>
-          <input id="systemName" required placeholder="Contoh: Sistem Rekod Perkakasan" />
+        <input id="systemIconValue" type="hidden" value="&#8599;" />
+        <div><label for="systemName">Nama Sistem</label><input id="systemName" required placeholder="Contoh: Sistem Rekod Perkakasan" /></div>
+        <div><label for="systemUrl">URL / Pautan Web</label><input id="systemUrl" type="url" required placeholder="https://..." /></div>
+        <div class="span-2"><label for="systemDescription">Penerangan</label><textarea id="systemDescription" rows="3" placeholder="Penerangan ringkas sistem"></textarea></div>
+
+        <div class="span-2 icon-manager">
+          <div class="icon-preview-box"><div id="systemIconPreview" class="system-icon preview-icon">&#8599;</div></div>
+          <div class="icon-controls">
+            <label>Ikon Sistem</label>
+            <p class="form-help">Pilih ikon ringkas atau upload PNG/JPG/WebP maksimum 2MB.</p>
+            <div class="icon-control-row">
+              <select id="systemIconPreset">
+                <option value="&#8599;">Pautan</option>
+                <option value="&#128187;">Komputer</option>
+                <option value="&#128736;">Peralatan</option>
+                <option value="&#128230;">Inventori</option>
+                <option value="&#128203;">Rekod</option>
+                <option value="&#128202;">Laporan</option>
+                <option value="&#128276;">Notifikasi</option>
+              </select>
+              <label class="upload-btn" for="systemIconFile">Upload Ikon</label>
+              <input id="systemIconFile" class="file-input" type="file" accept="image/png,image/jpeg,image/webp" />
+            </div>
+            <span id="iconFileName" class="file-name">Tiada fail dipilih</span>
+          </div>
         </div>
-        <div>
-          <label for="systemUrl">URL / Pautan Web</label>
-          <input id="systemUrl" type="url" required placeholder="https://..." />
-        </div>
-        <div>
-          <label for="systemDescription">Penerangan</label>
-          <textarea id="systemDescription" rows="3" placeholder="Penerangan ringkas"></textarea>
-        </div>
-        <div>
-          <label for="systemIcon">Ikon</label>
-          <select id="systemIcon">
-            <option value="🔗">🔗 Pautan</option>
-            <option value="💻">💻 Komputer</option>
-            <option value="🛠️">🛠️ Peralatan</option>
-            <option value="📦">📦 Pinjaman / Inventori</option>
-            <option value="🧾">🧾 Rekod</option>
-            <option value="📊">📊 Laporan</option>
-            <option value="🔔">🔔 Notifikasi</option>
-          </select>
-        </div>
-        <div>
-          <label for="systemStatus">Status</label>
-          <select id="systemStatus">
-            <option value="ACTIVE">Aktif</option>
-            <option value="INACTIVE">Tidak Aktif</option>
-          </select>
-        </div>
-        <div>
-          <label for="systemOrder">Susunan</label>
-          <input id="systemOrder" type="number" min="1" value="1" />
-        </div>
-        <div class="form-actions">
-          <button type="button" class="ghost-btn" data-close-modal="systemModal">Batal</button>
-          <button class="primary-btn" type="submit">Simpan</button>
-        </div>
+
+        <div><label for="systemStatus">Status</label><select id="systemStatus"><option value="ACTIVE">Aktif</option><option value="INACTIVE">Tidak Aktif</option></select></div>
+        <div><label for="systemOrder">Susunan</label><input id="systemOrder" type="number" min="1" value="1" /></div>
+        <div class="form-actions"><button type="button" class="ghost-btn" data-close-modal="systemModal">Batal</button><button id="saveSystemBtn" class="primary-btn" type="submit">Simpan</button></div>
       </form>
     </div>
   </div>
 
+  <!-- USER MODAL -->
   <div id="userModal" class="modal-backdrop hidden">
-    <div class="modal">
+    <div class="modal modal-small">
       <div class="modal-head">
-        <div><p class="eyebrow">Pentadbir</p><h3>Kemaskini Pengguna</h3></div>
-        <button class="icon-btn" data-close-modal="userModal">✕</button>
+        <div><p class="eyebrow">Pentadbir</p><h3 id="userModalTitle">Tambah Staff</h3></div>
+        <button class="icon-btn modal-close" type="button" data-close-modal="userModal">&#10005;</button>
       </div>
-      <form id="userForm" class="form-grid">
+      <form id="userForm" class="form-grid single-column">
         <input id="editUserId" type="hidden" />
-        <div>
-          <label for="editDisplayName">Nama Paparan</label>
-          <input id="editDisplayName" required />
-        </div>
-        <div>
-          <label for="editUsername">Nama Pengguna</label>
-          <input id="editUsername" required />
-        </div>
-        <div>
-          <label for="editPassword">Kata Laluan Baharu</label>
-          <input id="editPassword" type="password" placeholder="Biarkan kosong jika tidak berubah" />
-        </div>
-        <div>
-          <label for="editUserStatus">Status</label>
-          <select id="editUserStatus">
-            <option value="ACTIVE">Aktif</option>
-            <option value="INACTIVE">Tidak Aktif</option>
-          </select>
-        </div>
-        <div class="form-actions">
-          <button type="button" class="ghost-btn" data-close-modal="userModal">Batal</button>
-          <button class="primary-btn" type="submit">Kemaskini</button>
-        </div>
+        <input id="userFormMode" type="hidden" value="add" />
+        <div><label for="editDisplayName">Nama Staff</label><input id="editDisplayName" required placeholder="Nama penuh / nama paparan" /></div>
+        <div><label for="editUsername">Nama Pengguna</label><input id="editUsername" required placeholder="Contoh: ahmad.it" autocomplete="off" /></div>
+        <div><label for="editPassword"><span id="passwordFieldLabel">Kata Laluan</span></label><input id="editPassword" type="password" minlength="4" autocomplete="new-password" /><p id="passwordHelp" class="form-help">Minimum 4 aksara.</p></div>
+        <div id="userStatusWrap"><label for="editUserStatus">Status</label><select id="editUserStatus"><option value="ACTIVE">Aktif</option><option value="INACTIVE">Tidak Aktif</option></select></div>
+        <div class="form-actions"><button type="button" class="ghost-btn" data-close-modal="userModal">Batal</button><button id="saveUserBtn" class="primary-btn" type="submit">Simpan Akaun</button></div>
       </form>
     </div>
   </div>
