@@ -793,3 +793,21 @@ td{font-size:11px}
   }
   .secondary-hero h1{font-size:25px}
 }
+
+
+/* V7.1 — EMBEDDED LOGIN VIDEO */
+#loginVideo.login-video{
+  display:block !important;
+  visibility:visible !important;
+  opacity:1 !important;
+  position:absolute !important;
+  inset:0 !important;
+  width:100% !important;
+  height:100% !important;
+  object-fit:cover !important;
+  object-position:center center !important;
+  z-index:1 !important;
+}
+.video-fallback{z-index:0 !important}
+.video-overlay{z-index:2 !important}
+.login-visual-content{z-index:3 !important}
