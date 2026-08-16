@@ -155,7 +155,6 @@ function applyPortalLogo() {
 
 function initDirectLoginVideo() {
   const video = $("#loginVideo");
-  const errorBox = $("#videoLoadError");
   if (!video) return;
 
   video.muted = true;
@@ -164,22 +163,8 @@ function initDirectLoginVideo() {
   video.autoplay = true;
   video.playsInline = true;
 
-  const showError = () => {
-    if (errorBox) errorBox.classList.remove("hidden");
-  };
-
-  const hideError = () => {
-    if (errorBox) errorBox.classList.add("hidden");
-  };
-
-  video.addEventListener("loadeddata", hideError);
-  video.addEventListener("canplay", hideError);
-  video.addEventListener("error", showError);
-
-  video.play().catch(() => {
-    // Retry once after a short delay. Source is never changed by JS.
-    setTimeout(() => video.play().catch(showError), 400);
-  });
+  // Video is a visual enhancement only. Login never waits for it.
+  video.play().catch(() => {});
 }
 
 function populatePortalSettingsForm() {
@@ -215,6 +200,8 @@ function showPortal() {
   applyRole();
   updateClock();
   setView("dashboard");
+
+  // Requests run independently; portal becomes visible immediately.
   loadSystems();
   if (session.user.role === "ADMIN") {
     loadUsers();
@@ -273,19 +260,24 @@ function renderDashboardSystems() {
   const active = getActiveSystems();
   const history = getAccessHistory();
 
-  $("#emptySystems").classList.toggle("hidden", active.length > 0);
-  $("#systemGrid").classList.toggle("hidden", active.length === 0);
+  const grid = $("#systemGrid");
+  const empty = $("#emptySystems");
+  if (!grid || !empty) return;
 
-  $("#systemGrid").innerHTML = active.map((s, index) => `
+  empty.classList.toggle("hidden", active.length > 0);
+  grid.classList.toggle("hidden", active.length === 0);
+
+  grid.innerHTML = active.map((s, index) => `
     <article class="system-card card-theme-${(index % 6) + 1}">
       <div class="card-accent"></div>
 
       <div class="system-card-top">
         <div class="system-icon">${iconMarkup(s.icon)}</div>
-        <span class="status-pill">AKTIF</span>
+        <div class="card-priority">${String(index + 1).padStart(2, "0")}</div>
       </div>
 
       <div class="system-card-body">
+        <span class="status-pill">AKTIF</span>
         <h3>${safe(s.name)}</h3>
         <p>${safe(s.description || "Akses sistem melalui pautan web.")}</p>
       </div>
@@ -295,9 +287,11 @@ function renderDashboardSystems() {
       </div>
 
       <div class="system-actions">
-        <a class="open-btn" href="${safe(s.url)}" target="_blank" rel="noopener noreferrer"
+        <a class="open-btn" href="${safe(s.url)}" target="_blank"
+           rel="noopener noreferrer"
            onclick="recordSystemAccess('${safe(s.id)}')">
-          <span>Buka Sistem</span><span class="open-arrow">↗</span>
+          <span>Buka Sistem</span>
+          <span class="open-arrow">↗</span>
         </a>
       </div>
     </article>
@@ -334,7 +328,7 @@ async function loadUsers() {
 }
 
 function renderUsers() {
-  if ($("#staffCount")) $("#staffCount").textContent = users.filter(u => u.role !== "ADMIN").length;
+  if ($("#staffCount")) if ($("#staffCount")) $("#staffCount").textContent = users.filter(u => u.role !== "ADMIN").length;
   $("#usersTableBody").innerHTML = users.map(u => {
     const canDelete = u.role !== "ADMIN" && String(u.id) !== String(session.user.id);
     return `
@@ -836,7 +830,7 @@ $("#changePasswordForm").addEventListener("submit", async (e) => {
 
 (async function init() {
   initDirectLoginVideo();
-  await loadPortalSettings();
+  loadPortalSettings();
   updateClock();
   setInterval(updateClock, 1000);
 
