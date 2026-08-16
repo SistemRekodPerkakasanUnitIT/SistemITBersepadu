@@ -156,14 +156,11 @@ function applyPortalLogo() {
 function initDirectLoginVideo() {
   const video = $("#loginVideo");
   if (!video) return;
-
   video.muted = true;
   video.defaultMuted = true;
   video.loop = true;
   video.autoplay = true;
   video.playsInline = true;
-
-  // Video is a visual enhancement only. Login never waits for it.
   video.play().catch(() => {});
 }
 
