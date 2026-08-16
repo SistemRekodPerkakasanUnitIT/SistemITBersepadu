@@ -155,22 +155,58 @@ function applyLoginVideo() {
   if (!video) return;
 
   const enabled = portalSettings.loginVideoEnabled !== false;
-  const url = String(portalSettings.loginVideoUrl || cfg.LOGIN_VIDEO_URL || "login.mp4").trim();
+  const rawUrl = String(
+    portalSettings.loginVideoUrl ||
+    cfg.LOGIN_VIDEO_URL ||
+    "./login.mp4"
+  ).trim();
 
-  video.pause();
-  video.removeAttribute("src");
-
-  if (!enabled || !url) {
+  if (!enabled || !rawUrl) {
+    video.pause();
     video.classList.add("hidden");
-    video.load();
     return;
   }
 
+  // Jika admin simpan "login.mp4", browser akan baca dari folder GitHub Pages semasa.
+  let finalUrl = rawUrl;
+  if (!/^(https?:)?\/\//i.test(rawUrl) && !rawUrl.startsWith("data:")) {
+    try {
+      finalUrl = new URL(rawUrl, window.location.href).href;
+    } catch (_) {
+      finalUrl = rawUrl;
+    }
+  }
+
   video.classList.remove("hidden");
-  video.src = url;
-  video.onerror = () => video.classList.add("hidden");
+  video.muted = true;
+  video.defaultMuted = true;
+  video.loop = true;
+  video.autoplay = true;
+  video.playsInline = true;
+
+  const current = video.getAttribute("src") || "";
+  if (!current || current !== finalUrl) {
+    video.src = finalUrl;
+  }
+
+  video.onerror = () => {
+    // Cuba fallback terus ke login.mp4 jika URL tetapan gagal.
+    const fallback = new URL("./login.mp4", window.location.href).href;
+    if (video.src !== fallback) {
+      video.src = fallback;
+      video.load();
+      video.play().catch(() => {});
+      return;
+    }
+    video.classList.add("hidden");
+  };
+
   video.load();
-  video.play().catch(() => {});
+  video.play().catch(() => {
+    // Sesetengah browser hanya benarkan autoplay apabila muted;
+    // muted sudah dipaksa di atas, jadi cubaan kedua biasanya berjaya.
+    setTimeout(() => video.play().catch(() => {}), 250);
+  });
 }
 
 function populatePortalSettingsForm() {
