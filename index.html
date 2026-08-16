@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css?v=7.0.0" />
 </head>
 <body>
   <div id="toast" class="toast" aria-live="polite"></div>
@@ -16,21 +16,11 @@
   <!-- LOGIN -->
   <section id="loginView" class="login-shell">
     <div class="login-visual">
-      <video
-        id="loginVideo"
-        class="login-video"
-        src="./login.mp4?v=20260816"
-        autoplay
-        muted
-        loop
-        playsinline
-        webkit-playsinline
-        preload="auto">
+      <video id="loginVideo" class="login-video"
+        autoplay muted loop playsinline webkit-playsinline preload="auto">
+        <source src="login.mp4?v=7.0.0" type="video/mp4">
       </video>
       <div class="video-fallback"></div>
-      <div id="videoLoadError" class="video-load-error hidden">
-        Video login tidak dapat dimainkan. Semak format/codec fail login.mp4.
-      </div>
       <div class="video-overlay"></div>
       <div class="login-visual-content">
         <div class="brand-lockup">
@@ -143,24 +133,39 @@
 
       <div class="content">
         <!-- DASHBOARD -->
-        <section id="dashboardSection" class="view-section">
-          <div class="premium-hero">
+        <section id="dashboardSection" class="view-section dashboard-view">
+          <div class="dashboard-priority-head">
+            <div>
+              <p class="eyebrow">Akses Utama</p>
+              <h2>Sistem &amp; Portal Unit IT</h2>
+              <p>Buka sistem yang diperlukan terus dari sini.</p>
+            </div>
+            <div class="dashboard-head-actions">
+              <button id="dashboardAddSystemBtn" class="primary-btn admin-only">+ Tambah Sistem</button>
+              <button id="refreshSystemsBtn" class="ghost-btn">&#8635; Segarkan</button>
+            </div>
+          </div>
+
+          <div id="systemGrid" class="system-grid priority-grid"></div>
+
+          <div id="emptySystems" class="empty-state hidden">
+            <div class="empty-icon">&#8599;</div>
+            <h3>Belum ada sistem aktif</h3>
+            <p>Pentadbir boleh menambah sistem melalui Tetapan Sistem.</p>
+          </div>
+
+          <div class="premium-hero secondary-hero">
             <div class="hero-glow hero-glow-one"></div>
             <div class="hero-glow hero-glow-two"></div>
 
             <div class="hero-content">
-              <span class="hero-kicker">PORTAL UTAMA UNIT IT PKPJ</span>
-              <h1>Urus akses sistem dengan lebih efisien, lebih teratur.</h1>
+              <span class="hero-kicker">SISTEM BERSEPADU PKPJ</span>
+              <h1>Urus akses sistem dengan lebih efisien dan lebih teratur.</h1>
               <p>
                 <span id="greetingText">Selamat datang</span>,
                 <strong id="welcomeName">Pengguna</strong>.
-                Semua pautan penting Unit IT berada dalam satu paparan yang kemas dan mudah dicapai.
+                Portal ini menghimpunkan pautan utama Unit IT supaya akses harian lebih cepat dan tersusun.
               </p>
-
-              <div class="hero-actions">
-                <button id="dashboardAddSystemBtn" class="light-btn admin-only">+ Tambah Sistem</button>
-                <button id="refreshSystemsBtn" class="glass-btn">&#8635; Segarkan</button>
-              </div>
             </div>
 
             <div class="hero-orbit" aria-hidden="true">
@@ -171,27 +176,13 @@
             </div>
           </div>
 
-          <div class="section-title-row">
-            <div>
-              <p class="eyebrow">Akses Utama</p>
-              <h3>Sistem &amp; Portal Unit IT</h3>
-            </div>
-            <div class="last-updated" id="lastUpdated">Belum disegarkan</div>
-          </div>
-
-          <div id="systemGrid" class="system-grid"></div>
-
-          <div id="emptySystems" class="empty-state hidden">
-            <div class="empty-icon">&#8599;</div>
-            <h3>Tiada sistem aktif</h3>
-            <p>Hubungi pentadbir untuk menambah pautan sistem.</p>
-          </div>
+          <div class="last-updated dashboard-last-updated" id="lastUpdated">Belum disegarkan</div>
         </section>
 
         <!-- SYSTEM SETTINGS -->
         <section id="settingsSection" class="view-section hidden admin-only">
           <div class="section-head">
-            <div><p class="eyebrow">Pentadbiran</p><h3>Tetapan Sistem</h3><p>Urus logo portal, ikon dan senarai sistem pada dashboard.</p></div>
+            <div><p class="eyebrow">Pentadbiran</p><h3>Tetapan Sistem</h3><p>Urus logo portal, ikon, pautan dan susunan sistem.</p></div>
             <button id="newSystemBtn" class="primary-btn">+ Tambah Sistem</button>
           </div>
 
@@ -234,7 +225,7 @@
         <!-- USERS -->
         <section id="usersSection" class="view-section hidden admin-only">
           <div class="section-head">
-            <div><p class="eyebrow">Pentadbiran</p><h3>Pengurusan Pengguna</h3><p>Tambah Staff IT, kemas kini username/password atau padam akaun.</p></div>
+            <div><p class="eyebrow">Pentadbiran</p><h3>Pengurusan Pengguna</h3><p>Tambah staff, tukar maklumat akaun dan urus akses pengguna.</p></div>
             <button id="newUserBtn" class="primary-btn">+ Tambah Staff</button>
           </div>
           <div class="panel table-panel">
@@ -328,7 +319,7 @@
     </div>
   </div>
 
-  <script src="config.js"></script>
-  <script src="app.js"></script>
+  <script src="config.js?v=7.0.0"></script>
+  <script src="app.js?v=7.0.0"></script>
 </body>
 </html>
