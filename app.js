@@ -33,7 +33,7 @@ function initials(name = "IT") {
 }
 
 function isImageIcon(icon) {
-  return /^https?:\/\//i.test(String(icon || "").trim());
+  return /^(https?:\/\/|data:image\/)/i.test(String(icon || "").trim());
 }
 
 function iconMarkup(icon) {
@@ -321,31 +321,72 @@ async function deleteSystem(id, name) {
   }
 }
 
-function fileToBase64(file) {
+function compressIconFile(file) {
   return new Promise((resolve, reject) => {
+    const allowed = ["image/png", "image/jpeg", "image/webp"];
+    if (!allowed.includes(file.type)) {
+      reject(new Error("Ikon mesti PNG, JPG atau WebP."));
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      reject(new Error("Saiz ikon asal maksimum 2MB."));
+      return;
+    }
+
     const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result).split(",")[1] || "");
-    reader.onerror = reject;
+    reader.onerror = () => reject(new Error("Fail ikon tidak dapat dibaca."));
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = () => reject(new Error("Gambar ikon tidak sah."));
+      img.onload = () => {
+        const attempts = [
+          { size: 128, quality: .82 },
+          { size: 112, quality: .76 },
+          { size: 96, quality: .70 },
+          { size: 80, quality: .64 },
+          { size: 64, quality: .58 }
+        ];
+
+        const encode = (opt) => {
+          const canvas = document.createElement("canvas");
+          canvas.width = opt.size;
+          canvas.height = opt.size;
+          const ctx = canvas.getContext("2d");
+          ctx.clearRect(0, 0, opt.size, opt.size);
+
+          const scale = Math.min(opt.size / img.width, opt.size / img.height);
+          const w = Math.max(1, Math.round(img.width * scale));
+          const h = Math.max(1, Math.round(img.height * scale));
+          const x = Math.round((opt.size - w) / 2);
+          const y = Math.round((opt.size - h) / 2);
+          ctx.drawImage(img, x, y, w, h);
+
+          let dataUrl = canvas.toDataURL("image/webp", opt.quality);
+          if (!dataUrl.startsWith("data:image/webp")) {
+            dataUrl = canvas.toDataURL("image/jpeg", opt.quality);
+          }
+          return dataUrl;
+        };
+
+        for (const opt of attempts) {
+          const dataUrl = encode(opt);
+          // Simpan margin selamat di bawah had panjang teks sel Google Sheet.
+          if (dataUrl.length <= 44000) {
+            resolve(dataUrl);
+            return;
+          }
+        }
+        reject(new Error("Ikon masih terlalu besar selepas dikecilkan. Cuba gambar yang lebih ringkas."));
+      };
+      img.src = String(reader.result);
+    };
     reader.readAsDataURL(file);
   });
 }
 
 async function uploadPendingIcon() {
   if (!pendingIconFile) return $("#systemIconValue").value || "↗";
-
-  const allowed = ["image/png", "image/jpeg", "image/webp"];
-  if (!allowed.includes(pendingIconFile.type)) throw new Error("Ikon mesti PNG, JPG atau WebP.");
-  if (pendingIconFile.size > 2 * 1024 * 1024) throw new Error("Saiz ikon maksimum 2MB.");
-
-  const data = await fileToBase64(pendingIconFile);
-  const out = await api("uploadSystemIcon", {
-    file: {
-      name: pendingIconFile.name,
-      mimeType: pendingIconFile.type,
-      data
-    }
-  });
-  return out.url;
+  return await compressIconFile(pendingIconFile);
 }
 
 function openNewUser() {
