@@ -3,6 +3,11 @@ const API_URL = cfg.API_URL || "";
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
 
+function setText(selector, value) {
+  const el = $(selector);
+  if (el) el.textContent = value;
+}
+
 let session = null;
 let systems = [];
 let users = [];
@@ -83,7 +88,7 @@ function setView(name) {
   $$(".view-section").forEach(el => el.classList.add("hidden"));
   $(map[name]).classList.remove("hidden");
   $$(".nav-btn[data-view]").forEach(btn => btn.classList.toggle("active", btn.dataset.view === name));
-  $("#pageTitle").textContent = {
+  if ($("#pageTitle")) $("#pageTitle").textContent = {
     dashboard: "Dashboard",
     settings: "Tetapan Sistem",
     users: "Pengguna",
@@ -97,28 +102,28 @@ function applyRole() {
   $$(".admin-only").forEach(el => el.classList.toggle("hidden", !isAdmin));
 
   const ini = initials(user.displayName);
-  $("#topName").textContent = user.displayName;
-  $("#topRole").textContent = roleLabel(user.role);
-  $("#sidebarRole").textContent = roleLabel(user.role);
-  $("#welcomeName").textContent = user.displayName;
-  $("#profileName").textContent = user.displayName;
-  $("#profileUsername").textContent = "@" + user.username;
-  $("#profileRole").textContent = roleLabel(user.role);
-  $("#topAvatar").textContent = ini;
-  $("#profileAvatar").textContent = ini;
+  setText("#topName", user.displayName);
+  setText("#topRole", roleLabel(user.role));
+  setText("#sidebarRole", roleLabel(user.role));
+  setText("#welcomeName", user.displayName);
+  setText("#profileName", user.displayName);
+  setText("#profileUsername", "@" + user.username);
+  setText("#profileRole", roleLabel(user.role));
+  setText("#topAvatar", ini);
+  setText("#profileAvatar", ini);
 }
 
 function updateClock() {
   const now = new Date();
-  $("#topDate").textContent = new Intl.DateTimeFormat("ms-MY", {
+  setText("#topDate", new Intl.DateTimeFormat("ms-MY", {
     weekday: "short", day: "2-digit", month: "short", year: "numeric"
-  }).format(now);
-  $("#topTime").textContent = new Intl.DateTimeFormat("ms-MY", {
+  }).format(now));
+  setText("#topTime", new Intl.DateTimeFormat("ms-MY", {
     hour: "2-digit", minute: "2-digit", second: "2-digit"
-  }).format(now);
+  }).format(now));
 
   const hour = now.getHours();
-  $("#greetingText").textContent = hour < 12 ? "Selamat pagi" : hour < 18 ? "Selamat petang" : "Selamat malam";
+  setText("#greetingText", hour < 12 ? "Selamat pagi" : hour < 18 ? "Selamat petang" : "Selamat malam");
 }
 
 function applyPortalLogo() {
@@ -148,8 +153,9 @@ function applyPortalLogo() {
   }
 }
 
-function applyLoginVideo() {
+function initDirectLoginVideo() {
   const video = $("#loginVideo");
+  const errorBox = $("#videoLoadError");
   if (!video) return;
 
   video.muted = true;
@@ -158,9 +164,21 @@ function applyLoginVideo() {
   video.autoplay = true;
   video.playsInline = true;
 
-  // login.mp4 is embedded directly in index.html.
+  const showError = () => {
+    if (errorBox) errorBox.classList.remove("hidden");
+  };
+
+  const hideError = () => {
+    if (errorBox) errorBox.classList.add("hidden");
+  };
+
+  video.addEventListener("loadeddata", hideError);
+  video.addEventListener("canplay", hideError);
+  video.addEventListener("error", showError);
+
   video.play().catch(() => {
-    setTimeout(() => video.play().catch(() => {}), 300);
+    // Retry once after a short delay. Source is never changed by JS.
+    setTimeout(() => video.play().catch(showError), 400);
   });
 }
 
@@ -185,12 +203,10 @@ async function loadPortalSettings() {
   }
 
   applyPortalLogo();
-  applyLoginVideo();
   populatePortalSettingsForm();
 }
 
 function initLoginVideo() {
-  applyLoginVideo();
 }
 
 function showPortal() {
@@ -238,7 +254,7 @@ async function loadSystems(showMessage = false) {
     const out = await api("getSystems");
     systems = out.systems || [];
     renderSystems();
-    $("#lastUpdated").textContent = "Dikemas kini " + formatDateTime(new Date().toISOString());
+    setText("#lastUpdated", "Dikemas kini " + formatDateTime(new Date().toISOString()));
     if (showMessage) showToast("Senarai sistem telah disegarkan.");
   } catch (err) {
     showToast(err.message, true);
@@ -819,6 +835,7 @@ $("#changePasswordForm").addEventListener("submit", async (e) => {
 });
 
 (async function init() {
+  initDirectLoginVideo();
   await loadPortalSettings();
   updateClock();
   setInterval(updateClock, 1000);
