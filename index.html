@@ -16,10 +16,21 @@
   <!-- LOGIN -->
   <section id="loginView" class="login-shell">
     <div class="login-visual">
-      <video id="loginVideo" class="login-video" autoplay muted loop playsinline preload="auto">
-        <source src="./login.mp4" type="video/mp4" />
+      <video
+        id="loginVideo"
+        class="login-video"
+        src="./login.mp4?v=20260816"
+        autoplay
+        muted
+        loop
+        playsinline
+        webkit-playsinline
+        preload="auto">
       </video>
       <div class="video-fallback"></div>
+      <div id="videoLoadError" class="video-load-error hidden">
+        Video login tidak dapat dimainkan. Semak format/codec fail login.mp4.
+      </div>
       <div class="video-overlay"></div>
       <div class="login-visual-content">
         <div class="brand-lockup">
@@ -136,15 +147,22 @@
           <div class="premium-hero">
             <div class="hero-glow hero-glow-one"></div>
             <div class="hero-glow hero-glow-two"></div>
+
             <div class="hero-content">
               <span class="hero-kicker">PORTAL UTAMA UNIT IT PKPJ</span>
               <h1>Urus akses sistem dengan lebih efisien, lebih teratur.</h1>
-              <p><span id="greetingText">Selamat datang</span>, <strong id="welcomeName">Pengguna</strong>. Semua pautan penting Unit IT berada dalam satu paparan yang kemas dan mudah dicapai.</p>
+              <p>
+                <span id="greetingText">Selamat datang</span>,
+                <strong id="welcomeName">Pengguna</strong>.
+                Semua pautan penting Unit IT berada dalam satu paparan yang kemas dan mudah dicapai.
+              </p>
+
               <div class="hero-actions">
                 <button id="dashboardAddSystemBtn" class="light-btn admin-only">+ Tambah Sistem</button>
                 <button id="refreshSystemsBtn" class="glass-btn">&#8635; Segarkan</button>
               </div>
             </div>
+
             <div class="hero-orbit" aria-hidden="true">
               <div class="orbit-core">💻</div>
               <span class="orbit-dot dot-a"></span>
@@ -152,21 +170,28 @@
               <span class="orbit-dot dot-c"></span>
             </div>
           </div>
-<div class="section-title-row">
-            <div><p class="eyebrow">Akses Utama</p><h3>Sistem &amp; Portal Unit IT</h3></div>
+
+          <div class="section-title-row">
+            <div>
+              <p class="eyebrow">Akses Utama</p>
+              <h3>Sistem &amp; Portal Unit IT</h3>
+            </div>
             <div class="last-updated" id="lastUpdated">Belum disegarkan</div>
           </div>
-<div id="systemGrid" class="system-grid"></div><h3>Sistem tidak ditemui</h3><p>Cuba kata carian yang lain.</p>
-          </div>
+
+          <div id="systemGrid" class="system-grid"></div>
+
           <div id="emptySystems" class="empty-state hidden">
-            <div class="empty-icon">&#8599;</div><h3>Tiada sistem aktif</h3><p>Hubungi pentadbir untuk menambah pautan sistem.</p>
+            <div class="empty-icon">&#8599;</div>
+            <h3>Tiada sistem aktif</h3>
+            <p>Hubungi pentadbir untuk menambah pautan sistem.</p>
           </div>
         </section>
 
         <!-- SYSTEM SETTINGS -->
         <section id="settingsSection" class="view-section hidden admin-only">
           <div class="section-head">
-            <div><p class="eyebrow">Pentadbiran</p><h3>Tetapan Sistem</h3><p>Urus identiti portal, video login dan senarai sistem pada dashboard.</p></div>
+            <div><p class="eyebrow">Pentadbiran</p><h3>Tetapan Sistem</h3><p>Urus logo portal, ikon dan senarai sistem pada dashboard.</p></div>
             <button id="newSystemBtn" class="primary-btn">+ Tambah Sistem</button>
           </div>
 
