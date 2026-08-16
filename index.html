@@ -16,7 +16,9 @@
   <!-- LOGIN -->
   <section id="loginView" class="login-shell">
     <div class="login-visual">
-      <video id="loginVideo" class="login-video" src="./login.mp4" autoplay muted loop playsinline preload="auto"></video>
+      <video id="loginVideo" class="login-video" autoplay muted loop playsinline preload="auto">
+        <source src="./login.mp4" type="video/mp4" />
+      </video>
       <div class="video-fallback"></div>
       <div class="video-overlay"></div>
       <div class="login-visual-content">
@@ -150,45 +152,11 @@
               <span class="orbit-dot dot-c"></span>
             </div>
           </div>
-
-          <div class="dashboard-summary">
-            <article class="summary-card">
-              <div class="summary-icon blue">&#8599;</div>
-              <div><span>Sistem Tersedia</span><strong id="systemCount">0</strong></div>
-              <small>akses aktif</small>
-            </article>
-            <article class="summary-card admin-only">
-              <div class="summary-icon green">&#10003;</div>
-              <div><span>Sistem Aktif</span><strong id="activeSystemCount">0</strong></div>
-              <small>dipaparkan</small>
-            </article>
-            <article class="summary-card admin-only">
-              <div class="summary-icon violet">&#9823;</div>
-              <div><span>Akaun Staff</span><strong id="staffCount">0</strong></div>
-              <small>berdaftar</small>
-            </article>
-            <article class="summary-card admin-only">
-              <div class="summary-icon amber">&#8212;</div>
-              <div><span>Tidak Aktif</span><strong id="inactiveSystemCount">0</strong></div>
-              <small>disembunyikan</small>
-            </article>
-          </div>
-
-          <div class="section-title-row">
-            <div><p class="eyebrow">Akses Pantas</p><h3>Sistem Anda</h3></div>
+<div class="section-title-row">
+            <div><p class="eyebrow">Akses Utama</p><h3>Sistem &amp; Portal Unit IT</h3></div>
             <div class="last-updated" id="lastUpdated">Belum disegarkan</div>
           </div>
-
-          <div class="dashboard-toolbar">
-            <div class="system-search-wrap">
-              <span class="search-icon">&#9906;</span>
-              <input id="systemSearch" type="search" placeholder="Cari sistem..." autocomplete="off" />
-            </div>
-          </div>
-
-          <div id="systemGrid" class="system-grid"></div>
-          <div id="noSearchResults" class="empty-state hidden">
-            <div class="empty-icon">&#9906;</div><h3>Sistem tidak ditemui</h3><p>Cuba kata carian yang lain.</p>
+<div id="systemGrid" class="system-grid"></div><h3>Sistem tidak ditemui</h3><p>Cuba kata carian yang lain.</p>
           </div>
           <div id="emptySystems" class="empty-state hidden">
             <div class="empty-icon">&#8599;</div><h3>Tiada sistem aktif</h3><p>Hubungi pentadbir untuk menambah pautan sistem.</p>
@@ -202,53 +170,27 @@
             <button id="newSystemBtn" class="primary-btn">+ Tambah Sistem</button>
           </div>
 
-          <div class="portal-settings-grid">
-            <div class="panel branding-settings-card">
-              <div class="panel-heading">
-                <p class="eyebrow">Identiti Portal</p>
-                <h3>Logo PKPJ</h3>
-                <p>Logo ini akan dipaparkan pada halaman login dan sidebar portal.</p>
-              </div>
+          <form id="portalLogoForm" class="panel branding-settings-card logo-only-card">
+            <div class="panel-heading">
+              <p class="eyebrow">Branding</p>
+              <h3>Logo PKPJ</h3>
+              <p>Pilih logo untuk paparan login dan sidebar portal.</p>
+            </div>
 
-              <div class="portal-logo-editor">
-                <div id="portalLogoPreview" class="portal-logo-preview">
-                  <span>PK</span>
-                </div>
-                <div class="portal-logo-actions">
-                  <label class="upload-btn portal-upload-btn" for="portalLogoFile">Pilih Logo PKPJ</label>
-                  <input id="portalLogoFile" class="file-input" type="file" accept="image/png,image/jpeg,image/webp" />
-                  <button id="removePortalLogoBtn" class="ghost-btn" type="button">Buang Logo</button>
-                  <small id="portalLogoFileName">PNG/JPG/WebP, maksimum 2MB</small>
-                </div>
+            <div class="portal-logo-editor">
+              <div id="portalLogoPreview" class="portal-logo-preview"><span>PK</span></div>
+              <div class="portal-logo-actions">
+                <label class="icon-action-btn upload-icon-only" for="portalLogoFile" title="Pilih logo" aria-label="Pilih logo">⬆</label>
+                <input id="portalLogoFile" class="file-input" type="file" accept="image/png,image/jpeg,image/webp" />
+                <button id="removePortalLogoBtn" class="icon-action-btn danger-icon" type="button" title="Buang logo" aria-label="Buang logo">×</button>
+                <small id="portalLogoFileName">PNG/JPG/WebP, maksimum 2MB</small>
               </div>
             </div>
 
-            <form id="portalSettingsForm" class="panel branding-settings-card">
-              <div class="panel-heading">
-                <p class="eyebrow">Paparan Login</p>
-                <h3>Video Latar Belakang</h3>
-                <p>Gunakan fail <strong>login.mp4</strong> di GitHub atau masukkan URL video MP4 sendiri.</p>
-              </div>
-
-              <label for="loginVideoUrl">Nama fail / URL video</label>
-              <input id="loginVideoUrl" type="text" placeholder="login.mp4" autocomplete="off" />
-
-              <label class="settings-check-row">
-                <input id="loginVideoEnabled" type="checkbox" checked />
-                <span>Aktifkan video pada halaman login</span>
-              </label>
-
-              <div class="admin-video-preview-shell">
-                <video id="adminVideoPreview" muted loop controls playsinline preload="metadata"></video>
-                <div id="adminVideoPreviewEmpty" class="video-preview-empty">Preview video akan muncul di sini.</div>
-              </div>
-
-              <div class="settings-actions">
-                <button id="previewLoginVideoBtn" class="ghost-btn" type="button">Preview Video</button>
-                <button id="savePortalSettingsBtn" class="primary-btn" type="submit">Simpan Tetapan</button>
-              </div>
-            </form>
-          </div>
+            <div class="settings-actions logo-save-actions">
+              <button id="savePortalLogoBtn" class="primary-btn" type="submit">Simpan Logo</button>
+            </div>
+          </form>
 
           <div class="system-list-heading">
             <div><p class="eyebrow">Pautan Sistem</p><h3>Senarai Sistem</h3></div>
