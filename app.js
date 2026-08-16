@@ -13,6 +13,56 @@ let systems = [];
 let users = [];
 let pendingIconFile = null;
 let pendingPortalLogoFile = null;
+
+// ============================================================
+// PWA INSTALL
+// ============================================================
+let deferredInstallPrompt = null;
+
+function setInstallButtonsVisible(visible) {
+  ["#installAppBtn", "#loginInstallAppBtn"].forEach(selector => {
+    const btn = $(selector);
+    if (btn) btn.classList.toggle("hidden", !visible);
+  });
+}
+
+async function triggerAppInstall() {
+  if (!deferredInstallPrompt) {
+    showToast("Jika butang install tidak muncul, guna menu browser > Install app / Add to Home Screen.", true);
+    return;
+  }
+
+  deferredInstallPrompt.prompt();
+  try {
+    await deferredInstallPrompt.userChoice;
+  } catch (_) {}
+
+  deferredInstallPrompt = null;
+  setInstallButtonsVisible(false);
+}
+
+window.addEventListener("beforeinstallprompt", (event) => {
+  event.preventDefault();
+  deferredInstallPrompt = event;
+  setInstallButtonsVisible(true);
+});
+
+window.addEventListener("appinstalled", () => {
+  deferredInstallPrompt = null;
+  setInstallButtonsVisible(false);
+  showToast("Sistem Bersepadu PKPJ berjaya dipasang.");
+});
+
+if (window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true) {
+  setInstallButtonsVisible(false);
+}
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./service-worker.js?v=8.0.0").catch(() => {});
+  });
+}
+
 let portalLogoRemoved = false;
 let portalSettings = {
   portalLogo: ""
@@ -87,6 +137,11 @@ function setView(name) {
 
   $$(".view-section").forEach(el => el.classList.add("hidden"));
   $(map[name]).classList.remove("hidden");
+
+  if (name === "settings") {
+    $$(".settings-collapse-panel").forEach(panel => panel.classList.add("hidden"));
+    $$(".settings-icon-tab").forEach(btn => btn.classList.remove("active"));
+  }
   $$(".nav-btn[data-view]").forEach(btn => btn.classList.toggle("active", btn.dataset.view === name));
   if ($("#pageTitle")) $("#pageTitle").textContent = {
     dashboard: "Dashboard",
@@ -264,35 +319,43 @@ function renderDashboardSystems() {
   empty.classList.toggle("hidden", active.length > 0);
   grid.classList.toggle("hidden", active.length === 0);
 
-  grid.innerHTML = active.map((s, index) => `
-    <article class="system-card card-theme-${(index % 6) + 1}">
-      <div class="card-accent"></div>
+  grid.innerHTML = active.map((s, index) => {
+    const hasImage = isImageIcon(s.icon);
+    const bgStyle = hasImage
+      ? `style="--system-bg-image:url('${safe(String(s.icon || "").replace(/'/g, "%27"))}')"`
+      : "";
 
-      <div class="system-card-top">
-        <div class="system-icon">${iconMarkup(s.icon)}</div>
-        <div class="card-priority">${String(index + 1).padStart(2, "0")}</div>
-      </div>
+    return `
+      <article class="system-card card-theme-${(index % 6) + 1} ${hasImage ? "has-system-bg" : "no-system-bg"}" ${bgStyle}>
+        <div class="system-bg-layer" aria-hidden="true"></div>
+        <div class="system-bg-overlay" aria-hidden="true"></div>
+        <div class="card-accent"></div>
 
-      <div class="system-card-body">
-        <span class="status-pill">AKTIF</span>
-        <h3>${safe(s.name)}</h3>
-        <p>${safe(s.description || "Akses sistem melalui pautan web.")}</p>
-      </div>
+        <div class="system-card-top">
+          <span class="status-pill">AKTIF</span>
+          <div class="card-priority">${String(index + 1).padStart(2, "0")}</div>
+        </div>
 
-      <div class="system-meta">
-        <span class="last-access">Akses terakhir: ${safe(formatDateTime(history[String(s.id)]))}</span>
-      </div>
+        <div class="system-card-body">
+          <h3>${safe(s.name)}</h3>
+          <p>${safe(s.description || "Akses sistem melalui pautan web.")}</p>
+        </div>
 
-      <div class="system-actions">
-        <a class="open-btn" href="${safe(s.url)}" target="_blank"
-           rel="noopener noreferrer"
-           onclick="recordSystemAccess('${safe(s.id)}')">
-          <span>Buka Sistem</span>
-          <span class="open-arrow">↗</span>
-        </a>
-      </div>
-    </article>
-  `).join("");
+        <div class="system-meta">
+          <span class="last-access">Akses terakhir: ${safe(formatDateTime(history[String(s.id)]))}</span>
+        </div>
+
+        <div class="system-actions">
+          <a class="open-btn" href="${safe(s.url)}" target="_blank"
+             rel="noopener noreferrer"
+             onclick="recordSystemAccess('${safe(s.id)}')">
+            <span>Buka Sistem</span>
+            <span class="open-arrow">↗</span>
+          </a>
+        </div>
+      </article>
+    `;
+  }).join("");
 }
 
 function renderSystems() {
@@ -627,6 +690,10 @@ async function logoutPortal() {
   if (!$("#rememberMe").checked) $("#password").value = "";
 }
 
+
+$("#installAppBtn")?.addEventListener("click", triggerAppInstall);
+$("#loginInstallAppBtn")?.addEventListener("click", triggerAppInstall);
+
 $("#logoutBtn").addEventListener("click", logoutPortal);
 $("#mobileLogoutBtn").addEventListener("click", logoutPortal);
 
@@ -718,6 +785,28 @@ $("#portalLogoForm").addEventListener("submit", async (e) => {
   }
 });
 
+
+
+function toggleSettingsPanel(panelId, trigger) {
+  const target = $("#" + panelId);
+  if (!target) return;
+
+  const wasOpen = !target.classList.contains("hidden");
+
+  $$(".settings-collapse-panel").forEach(panel => panel.classList.add("hidden"));
+  $$(".settings-icon-tab").forEach(btn => btn.classList.remove("active"));
+
+  if (!wasOpen) {
+    target.classList.remove("hidden");
+    if (trigger) trigger.classList.add("active");
+  }
+}
+
+$$(".settings-icon-tab").forEach(btn => {
+  btn.addEventListener("click", () => {
+    toggleSettingsPanel(btn.dataset.settingsPanel, btn);
+  });
+});
 
 $("#systemIconPreset").addEventListener("change", (e) => {
   pendingIconFile = null;
